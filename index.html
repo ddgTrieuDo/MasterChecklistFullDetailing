@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <title>Trang chủ — Master Checklist Full MEP Detailing</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --ink:#1b2430;
@@ -87,44 +88,151 @@
   .tradecard-emoji{font-size:30px;}
   .tradecard-label{font-size:14px;font-weight:700;margin-top:4px;}
   .tradecard-sub{font-size:12px;color:var(--sub);}
+
+  /* ---- Top account bar: userBadge + Logout + Admin (Admin-only, Home-only). ---- */
+  .accountbar{
+    display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px;
+    margin-bottom:14px;
+  }
+  .toolbtn{
+    font-size:12px;font-weight:600;
+    border:1px solid var(--line);
+    background:#fff;color:var(--ink);
+    padding:6px 12px;border-radius:8px;
+    cursor:pointer;
+  }
+  .toolbtn:hover{background:#eef2f5;}
+  .toolbtn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .toolbtn.primary:hover{background:#255a87;}
+  .toolbtn.danger{color:#c0392b;border-color:#f1c9c2;}
+  .toolbtn.danger:hover{background:#fdeeec;}
+  .userbadge{font-size:12px;font-weight:600;color:var(--ink);background:#eef2f5;border-radius:20px;padding:4px 10px;white-space:nowrap;}
+
+  /* ---- Reason banner: explains why a trade page bounced the visitor back here. ---- */
+  .reasonbanner{
+    display:none;align-items:center;gap:8px;
+    font-size:13px;color:#7a4a12;
+    background:#fdf1dd;border:1px solid #f0d7a8;border-radius:8px;
+    padding:10px 14px;margin:0 0 16px;
+  }
+
+  /* ---- "Dự án của tôi" list ---- */
+  .dashempty{font-size:12px;color:var(--sub);font-style:italic;}
+  .dash-pending{font-size:10px;color:#8a5a12;margin-left:6px;}
+  .myprojectsnote{display:none;font-size:12.5px;color:var(--green);font-weight:600;margin:-4px 0 14px;}
+  .myprojectrow{
+    display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:8px 14px;
+    padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;
+  }
+  .myprojectrow:last-child{border-bottom:none;}
+  .myprojectrow-selected{background:#f3f8fc;margin:0 -10px;padding:10px;border-radius:8px;border-bottom:1px solid transparent;}
+  .myprojectrow-main{flex:1 1 260px;min-width:0;}
+  .myprojectrow-code{font-size:12.5px;color:var(--ink);}
+  .myprojectrow-code b{color:var(--accent);}
+  .myprojectrow-action{flex:none;}
+
+  /* ---- Auth / gate / admin overlays (same 4-mode auth design + gate/admin
+     logic previously duplicated on every trade page — now lives ONLY here). ---- */
+  .gate-overlay{
+    position:fixed;inset:0;z-index:100;
+    background:rgba(27,36,48,.55);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .gate-card{
+    position:relative;
+    background:#fff;border-radius:14px;padding:26px 28px;max-width:420px;width:100%;
+    box-shadow:0 8px 30px rgba(16,24,32,.25);
+  }
+  .gate-close{
+    position:absolute;top:12px;right:14px;
+    width:26px;height:26px;border:none;border-radius:6px;background:transparent;
+    color:var(--sub);font-size:15px;line-height:1;cursor:pointer;
+  }
+  .gate-close:hover{background:#eef2f5;color:var(--ink);}
+  .gate-card h2{font-size:17px;margin:0 0 6px;}
+  .gate-card p{font-size:12.5px;color:var(--sub);margin:0 0 16px;line-height:1.5;}
+  .gate-field{margin-bottom:12px;}
+  .gate-field label{display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+  .gate-field input{
+    width:100%;font-size:14px;border:1px solid var(--line);border-radius:8px;
+    padding:9px 11px;box-sizing:border-box;
+  }
+  .gate-btn{
+    width:100%;font-size:14px;font-weight:700;color:#fff;background:var(--accent);
+    border:none;border-radius:8px;padding:11px;cursor:pointer;margin-top:4px;
+  }
+  .gate-btn:hover{background:#255a87;}
+  .gate-btn:disabled{background:#a9c1d6;cursor:wait;}
+  .gate-error{font-size:12.5px;color:#c0392b;margin-top:10px;min-height:1em;}
+  .gate-hint{font-size:11px;color:var(--sub);margin-top:14px;line-height:1.5;}
+  .switchprojlink{font-size:11.5px;color:var(--accent);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;}
+
+  .adminprojectrow{display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .adminassignrow{display:flex;gap:6px;flex:none;}
+  .adminleademail{font-size:12px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;min-width:200px;}
+  .adminscopetoggle{display:flex;}
+  .adminscopepanel{background:#f8f9fb;border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+  .scopetrades{display:flex;flex-direction:column;gap:8px;}
+  .scopetraderow{border-bottom:1px dashed var(--line);padding-bottom:6px;}
+  .scopetraderow:last-child{border-bottom:none;padding-bottom:0;}
+  .scopetradecb{display:flex;align-items:center;gap:6px;font-size:12.5px;}
+  .scopephases{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0 0 22px;}
+  .scopephasecb{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--sub);white-space:nowrap;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header id="top">
     <h1>MASTER CHECKLIST — FULL MEP DETAILING</h1>
-    <p class="subtitle">Trang chủ chung cho cả 5 ngành (Plumbing / HVAC / Mechanical Piping / Fire Protection / Electrical) — chọn ngành bên dưới để vào checklist + sơ đồ quy trình chi tiết, tự động đồng bộ qua Internet cho cả nhóm.</p>
+    <p class="subtitle">Trang chủ chung cho cả 6 ngành (Plumbing / HVAC / Mechanical Piping / Fire Protection / Electrical / Process Piping) — đăng nhập, chọn/tạo dự án ngay tại đây, rồi bấm vào 1 ngành bên dưới để vào checklist + sơ đồ quy trình chi tiết, tự động đồng bộ qua Internet cho cả nhóm.</p>
   </header>
+
+  <div class="accountbar">
+    <span class="userbadge" id="userBadge" style="display:none;"></span>
+    <button type="button" class="toolbtn" id="btnAdminPanel" style="display:none;">👑 Admin</button>
+    <button type="button" class="toolbtn danger" id="btnLogout" style="display:none;">Log Out</button>
+  </div>
+
+  <div class="reasonbanner" id="reasonBanner"></div>
+
+  <div class="card" id="myProjectsCard" style="display:none;">
+    <h2><span class="tag">DỰ ÁN</span> Dự án của tôi
+      <button type="button" class="toolbtn primary" id="btnJoinProject" style="margin-left:auto;">+ Tham gia / Tạo dự án</button>
+    </h2>
+    <p class="myprojectsnote" id="myProjectsNote"></p>
+    <div id="myProjectsList"><p class="dashempty">Đang tải...</p></div>
+  </div>
 
   <div class="card">
     <h2><span class="tag">NGÀNH</span> Chọn ngành để vào checklist</h2>
     <div class="tradepicker">
-    <a class="tradecard" href="flow_diagram_plumbing.html">
+    <a class="tradecard" href="flow_diagram_plumbing.html" data-trade="plumbing">
       <span class="tradecard-emoji">🚿</span>
       <span class="tradecard-label">Plumbing</span>
       <span class="tradecard-sub">Cấp thoát nước</span>
     </a>
-    <a class="tradecard" href="flow_diagram_hvac.html">
+    <a class="tradecard" href="flow_diagram_hvac.html" data-trade="hvac">
       <span class="tradecard-emoji">❄️</span>
       <span class="tradecard-label">HVAC</span>
       <span class="tradecard-sub">Điều hòa không khí</span>
     </a>
-    <a class="tradecard" href="flow_diagram_mp.html">
+    <a class="tradecard" href="flow_diagram_mp.html" data-trade="mp">
       <span class="tradecard-emoji">🔧</span>
       <span class="tradecard-label">Mechanical Piping</span>
       <span class="tradecard-sub">Ống cơ nhiệt</span>
     </a>
-    <a class="tradecard" href="flow_diagram_fp.html">
+    <a class="tradecard" href="flow_diagram_fp.html" data-trade="fp">
       <span class="tradecard-emoji">🔥</span>
       <span class="tradecard-label">Fire Protection</span>
       <span class="tradecard-sub">PCCC</span>
     </a>
-    <a class="tradecard" href="flow_diagram_el.html">
+    <a class="tradecard" href="flow_diagram_el.html" data-trade="el">
       <span class="tradecard-emoji">⚡</span>
       <span class="tradecard-label">Electrical</span>
       <span class="tradecard-sub">Điện</span>
     </a>
-    <a class="tradecard" href="flow_diagram_pp.html">
+    <a class="tradecard" href="flow_diagram_pp.html" data-trade="pp">
       <span class="tradecard-emoji">🏭</span>
       <span class="tradecard-label">Process Piping</span>
       <span class="tradecard-sub">Ống công nghệ</span>
@@ -138,7 +246,7 @@
       Tích vào từng mục khi đã hoàn thành. Một số mục (vd. Scope Boundary, Document Conflict Check, Approval Status, Shop Sleeve Status...) hiển thị dưới dạng <b>dropdown chọn trạng thái</b> thay vì ô tích, vì bản chất là chọn 1 trong nhiều trạng thái chứ không phải chỉ "đã làm/chưa làm". Nếu cả một mục nhỏ hoặc cả một Giai đoạn đã xong, dùng nút <b>"☑ Check All"</b> ở đầu mỗi khung (hoặc <b>"☑ Check All Phase"</b> ở đầu mỗi Giai đoạn) để tích nhanh toàn bộ ô tích — nút này không tự chọn hộ các dropdown trạng thái, để tránh chọn sai. Các mục có nhãn <b>🔁 "Cần làm hôm nay"</b> là việc lặp lại mỗi ngày — tự reset về chưa tích vào ngày hôm sau, không tính vào % hoàn thành chung của cả dự án.
     </p>
     <p style="font-size:13px;color:var(--sub);margin:0 0 8px;">
-      <b>Dùng chung nhiều người — tự đồng bộ qua Internet:</b> đăng nhập bằng email, sau đó nhập Tên dự án + Mã truy cập (hoặc chọn dự án đã tham gia ở dropdown trên thanh công cụ) để "vào" đúng dự án của mình. Mọi người trong cùng dự án (dù ở máy khác, nơi khác) sẽ thấy chung 1 checklist — ai tích hoặc chọn trạng thái, người khác đang mở trang cũng thấy cập nhật gần như ngay lập tức, không cần tải lại trang. Góc thanh công cụ có chấm tròn báo trạng thái kết nối (xanh = đang đồng bộ tốt). Muốn thêm hoặc chuyển dự án khác, dùng dropdown dự án hoặc nút <b>"+ Join Project"</b> trên thanh công cụ. Nút <b>"📊 Dashboard"</b> cho xem tổng quan tiến độ tất cả các Giai đoạn/khung trong dự án ở một màn hình.
+      <b>Dùng chung nhiều người — tự đồng bộ qua Internet:</b> đăng nhập bằng email ngay tại trang này, sau đó chọn dự án đã tham gia (hoặc bấm <b>"+ Tham gia / Tạo dự án"</b> ở mục "Dự án của tôi" bên trên và nhập Tên dự án + Mã truy cập). Bấm <b>"Chọn dự án này"</b> rồi vào 1 ngành bên dưới — mọi thao tác trên trang ngành đó sẽ áp dụng đúng cho dự án vừa chọn. Mọi người trong cùng dự án (dù ở máy khác, nơi khác) sẽ thấy chung 1 checklist — ai tích hoặc chọn trạng thái, người khác đang mở trang cũng thấy cập nhật gần như ngay lập tức, không cần tải lại trang. Muốn đổi sang dự án khác, quay lại trang Home này, chọn dự án khác trong "Dự án của tôi" rồi vào lại ngành (hoặc dùng dropdown dự án trên thanh công cụ của trang ngành để chuyển nhanh giữa các dự án ĐÃ tham gia). Nút <b>"📊 Dashboard"</b> trên mỗi trang ngành cho xem tổng quan tiến độ tất cả các Giai đoạn/khung trong dự án ở một màn hình.
     </p>
     <p style="font-size:13px;color:var(--sub);margin:0 0 8px;">
       <b>Giao việc riêng cho từng người:</b> có 2 cách. (1) Gõ tên vào ô "Giao cho" ở đầu mỗi khung — tên nào khớp đúng với tên hiển thị của một tài khoản đã tham gia dự án sẽ áp dụng cho <i>toàn bộ</i> các mục trong khung đó; sửa lại ô này sẽ áp lại danh sách mới cho cả khung. (2) Bấm nút <b>"👤+"</b> ngay cạnh một mục cụ thể để chỉ giao riêng mục đó cho một hoặc vài người, không ảnh hưởng các mục khác trong khung. Mục đã giao việc chỉ còn <b>1 ô tích/dropdown dùng chung</b>, nhưng chỉ những người được giao mới tích/chọn được — người khác nhìn thấy nhưng không thao tác được. Bên dưới có danh sách trạng thái riêng của từng người (✓ đã làm / ○ chưa làm, kèm thời gian); nếu được giao từ 3 người trở lên, mặc định chỉ hiện 2 người đầu, bấm dòng "+N người khác" để xem đủ danh sách.
@@ -180,22 +288,666 @@
       Ứng dụng có 3 cấp quyền độc lập với vai trò BIM/MEP ở trên — quyền này quyết định ai được giao việc, duyệt thành viên, tạo dự án mới:
     </p>
     <div class="legend legend-prose">
-      <div class="item"><span class="swatch" style="background:#c9922e"></span><span class="itemtext"><b>👑 Admin</b> — cấp cao nhất. Là người duy nhất tạo được dự án mới, và chỉ Admin mới chỉ định ai làm Trưởng dự án cho từng dự án (qua nút <b>"👑 Admin"</b> trên thanh công cụ, chỉ Admin mới thấy nút này). Admin cũng là người chọn (các) Ngành và (các) Phase mà một dự án thực sự dùng.</span></div>
-      <div class="item"><span class="swatch" style="background:#7c4fd6"></span><span class="itemtext"><b>Trưởng dự án</b> — do Admin chỉ định riêng cho từng dự án. Được quyền giao việc cho nhân viên (ô "Giao cho" + nút "👤+"), duyệt/từ chối nhân viên mới xin vào dự án, và chỉ định nhân viên được sửa (các) ngành nào — tất cả qua nút <b>"✅ Duyệt thành viên"</b> trên thanh công cụ (chỉ Trưởng dự án/Admin mới thấy nút này). Trưởng dự án luôn sửa được TẤT CẢ các ngành trong dự án của mình, không bị giới hạn theo ngành.</span></div>
-      <div class="item"><span class="swatch" style="background:#2c6ea6"></span><span class="itemtext"><b>Nhân viên</b> — mặc định khi tham gia dự án. Chỉ tích/chọn được các mục mình được giao (hoặc mục dùng chung, không giao riêng ai) — không giao việc được cho người khác, ô "Giao cho" và nút "👤+" sẽ bị khoá/ẩn.</span></div>
+      <div class="item"><span class="swatch" style="background:#c9922e"></span><span class="itemtext"><b>👑 Admin</b> — cấp cao nhất. Là người duy nhất tạo được dự án mới, và chỉ Admin mới chỉ định ai làm Trưởng dự án cho từng dự án (qua nút <b>"👑 Admin"</b> ở trang Home này, chỉ Admin mới thấy nút này). Admin cũng là người chọn (các) Ngành và (các) Phase mà một dự án thực sự dùng, và luôn thấy được danh sách TOÀN BỘ dự án trong hệ thống kèm Asset Code của từng dự án ở mục "Dự án của tôi" bên trên.</span></div>
+      <div class="item"><span class="swatch" style="background:#7c4fd6"></span><span class="itemtext"><b>Trưởng dự án</b> — do Admin chỉ định riêng cho từng dự án. Được quyền giao việc cho nhân viên (ô "Giao cho" + nút "👤+"), duyệt/từ chối nhân viên mới xin vào dự án, và chỉ định nhân viên được sửa (các) ngành nào — tất cả qua nút <b>"✅ Duyệt thành viên"</b> trên thanh công cụ của trang ngành (chỉ Trưởng dự án/Admin mới thấy nút này). Trưởng dự án luôn sửa được TẤT CẢ các ngành trong dự án của mình, không bị giới hạn theo ngành, và thấy được Asset Code của (các) dự án mình làm Trưởng dự án ở mục "Dự án của tôi".</span></div>
+      <div class="item"><span class="swatch" style="background:#2c6ea6"></span><span class="itemtext"><b>Nhân viên</b> — mặc định khi tham gia dự án. Chỉ tích/chọn được các mục mình được giao (hoặc mục dùng chung, không giao riêng ai) — không giao việc được cho người khác, ô "Giao cho" và nút "👤+" sẽ bị khoá/ẩn. Nhân viên KHÔNG thấy Asset Code của bất kỳ dự án nào trong "Dự án của tôi" — mục này chỉ hiện tên dự án và trạng thái tham gia.</span></div>
     </div>
     <p style="font-size:12px;color:var(--sub);margin:10px 0 0;">
-      Nhân viên tham gia một dự án ĐÃ có người khác đang dùng (nhập đúng Tên dự án + Mã truy cập) sẽ ở trạng thái <b>"Đang chờ duyệt"</b> — chưa xem/thao tác được checklist cho tới khi Trưởng dự án hoặc Admin bấm duyệt. Đây là để tránh người lạ biết mã truy cập tự ý vào xem dữ liệu dự án.
+      Nhân viên tham gia một dự án ĐÃ có người khác đang dùng (nhập đúng Tên dự án + Mã truy cập) sẽ ở trạng thái <b>"Đang chờ duyệt"</b> — chưa xem/thao tác được checklist cho tới khi Trưởng dự án hoặc Admin bấm duyệt. Đây là để tránh người lạ biết mã truy cập tự ý vào xem dữ liệu dự án. Trạng thái này hiện ngay trong "Dự án của tôi" ở trang Home.
     </p>
     <p style="font-size:12px;color:var(--sub);margin:6px 0 0;">
-      <b>Giới hạn theo ngành (Plumbing/HVAC/Mechanical Piping/Fire Protection/Electrical):</b> khi duyệt một Nhân viên (hoặc bất kỳ lúc nào sau đó), Trưởng dự án/Admin có thể tick chọn đúng (các) ngành người đó được sửa. Nếu không tick ngành nào, Nhân viên đó KHÔNG bị giới hạn — sửa được mọi ngành trong dự án như trước đây. Nếu đã tick ít nhất 1 ngành, sang các ngành KHÁC (không nằm trong danh sách được tick) trang sẽ tự khoá toàn bộ ô tích/dropdown lại — chỉ xem, không sửa được — kèm banner cảnh báo ở đầu trang.
+      <b>Giới hạn theo ngành (Plumbing / HVAC / Mechanical Piping / Fire Protection / Electrical / Process Piping):</b> khi duyệt một Nhân viên (hoặc bất kỳ lúc nào sau đó), Trưởng dự án/Admin có thể tick chọn đúng (các) ngành người đó được sửa. Nếu không tick ngành nào, Nhân viên đó KHÔNG bị giới hạn — sửa được mọi ngành trong dự án như trước đây. Nếu đã tick ít nhất 1 ngành, sang các ngành KHÁC (không nằm trong danh sách được tick) trang sẽ tự khoá toàn bộ ô tích/dropdown lại — chỉ xem, không sửa được — kèm banner cảnh báo ở đầu trang.
     </p>
     <p style="font-size:12px;color:var(--sub);margin:6px 0 0;">
-      <b>Ngành/Phase của cả dự án:</b> ngoài phân quyền theo người ở trên, Admin còn chọn được (các) Ngành và (các) Phase (01–09, riêng theo từng ngành) mà TOÀN BỘ dự án thực sự dùng — qua "👑 Admin" → "⚙️ Ngành & Phase của dự án". Ngành/Phase không được chọn sẽ ẩn hẳn khỏi trang cho mọi người (kể cả Admin), không tính vào % hoàn thành. Dự án chưa được Admin cấu hình mục này mặc định dùng TẤT CẢ ngành/phase.
+      <b>Ngành/Phase của cả dự án:</b> ngoài phân quyền theo người ở trên, Admin còn chọn được (các) Ngành và (các) Phase (01–09, riêng theo từng ngành) mà TOÀN BỘ dự án thực sự dùng — qua "👑 Admin" (ở trang Home) → "⚙️ Ngành & Phase của dự án". Ngành/Phase không được chọn sẽ ẩn hẳn khỏi trang cho mọi người (kể cả Admin), không tính vào % hoàn thành. Dự án chưa được Admin cấu hình mục này mặc định dùng TẤT CẢ ngành/phase.
     </p>
   </div>
 
-  <footer>Master Checklist Full MEP Detailing · 5 ngành · 9 Phases mỗi ngành</footer>
+  <footer>Master Checklist Full MEP Detailing · 6 ngành · 9 Phases mỗi ngành</footer>
 </div>
+
+<div class="gate-overlay" id="authOverlay" style="display:none;">
+  <div class="gate-card">
+    <h2 id="authTitle">Log In</h2>
+    <p id="authIntro">Đăng nhập bằng email để hệ thống biết chính xác bạn là ai — cần thiết để giao việc riêng cho từng người và chặn người khác tích hộ phần không phải của họ.</p>
+    <div class="gate-field" id="authEmailField">
+      <label for="authEmail">Email</label>
+      <input type="email" id="authEmail" placeholder="you@company.com" />
+    </div>
+    <div class="gate-field" id="authPasswordField">
+      <label for="authPassword" id="authPasswordLabel">Password</label>
+      <input type="password" id="authPassword" placeholder="Minimum 6 characters" />
+    </div>
+    <div class="gate-field" id="authConfirmField" style="display:none;">
+      <label for="authPasswordConfirm">Confirm new password</label>
+      <input type="password" id="authPasswordConfirm" placeholder="Re-enter new password" />
+    </div>
+    <div class="gate-field" id="authNameField" style="display:none;">
+      <label for="authDisplayName">Display name (so others recognize you)</label>
+      <input type="text" id="authDisplayName" placeholder="e.g. Trieu Do - Detailer" />
+    </div>
+    <p class="gate-hint" id="authForgotLine" style="text-align:right;margin:-6px 0 10px;">
+      <button type="button" class="switchprojlink" id="authForgotLink">Forgot password?</button>
+    </p>
+    <button type="button" class="gate-btn" id="authBtnSubmit">Log In</button>
+    <div class="gate-error" id="authError"></div>
+    <p class="gate-hint" id="authHint">No account yet? <button type="button" class="switchprojlink" id="authToggleMode">Sign Up</button></p>
+  </div>
+</div>
+
+<div class="gate-overlay" id="gateOverlay" style="display:none;">
+  <div class="gate-card">
+    <button type="button" class="gate-close" id="gateClose" title="Close" aria-label="Close">✕</button>
+    <h2>Join / Create Project</h2>
+    <p>Nhập tên dự án và mã truy cập. Nếu tên dự án chưa từng dùng, hệ thống sẽ tự tạo mới với mã bạn nhập — hãy chia sẻ đúng tên + mã này cho những người cùng làm dự án để họ vào chung. Mọi người trong dự án đều thấy tiến độ của nhau theo thời gian thực; mục nào được giao riêng cho ai thì chỉ người đó tự tích được phần của mình.</p>
+    <div class="gate-field">
+      <label for="gateProjectName">Project Name</label>
+      <input type="text" id="gateProjectName" placeholder="e.g. Toa nha ABC - Block A" />
+    </div>
+    <div class="gate-field">
+      <label for="gateAccessCode">Access Code</label>
+      <input type="text" id="gateAccessCode" placeholder="e.g. abc123" />
+    </div>
+    <button type="button" class="gate-btn" id="gateBtnEnter">Join Project</button>
+    <div class="gate-error" id="gateError"></div>
+  </div>
+</div>
+
+<div class="gate-overlay" id="adminOverlay" style="display:none;align-items:flex-start;padding:40px 20px;">
+  <div class="gate-card" style="max-width:720px;max-height:85vh;overflow-y:auto;">
+    <h2 style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      👑 Admin — Quản lý dự án
+      <button type="button" class="toolbtn" id="btnCloseAdmin" style="padding:4px 10px;">✕ Close</button>
+    </h2>
+    <p style="font-size:12.5px;color:var(--sub);">Chỉ Admin thấy được mục này: xem tất cả dự án kèm Asset Code, và chỉ định Trưởng dự án cho từng dự án. Tạo dự án mới vẫn qua nút "+ Tham gia / Tạo dự án" như bình thường — chỉ Admin mới tạo được dự án CHƯA từng có.</p>
+    <div id="adminProjectsList"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // Shared with every trade page — MUST stay byte-identical to
+  // build_phase_page.py's LAST_PROJECT_KEY, SUPABASE_URL, SUPABASE_ANON_KEY.
+  var LAST_PROJECT_KEY = 'mep_last_project_v1';
+  var SUPABASE_URL = 'https://owevmiwcacptrhchgtkx.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_FP-93thPbaqNpRG2e1ja0w_sx7pHmEj';
+  var sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+  var TRADE_LIST = [{"key": "plumbing", "label": "Plumbing"}, {"key": "hvac", "label": "HVAC"}, {"key": "mp", "label": "Mechanical Piping"}, {"key": "fp", "label": "Fire Protection"}, {"key": "el", "label": "Electrical"}, {"key": "pp", "label": "Process Piping"}];
+  var PHASE_CODES = ['01', '02', '03', '04', '05', '06', '07', '08', '09'];
+
+  var CURRENT_USER = null;   // {id, email, display_name} -- set once logged in via Supabase Auth
+  var MY_PROJECTS = [];      // [{id, name, access_code, my_role, my_status, is_admin}] from list_my_projects_with_code()
+  var IS_ADMIN = false;
+
+  function esc(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; }
+
+  function saveLastProject(id, name) {
+    try { window.localStorage.setItem(LAST_PROJECT_KEY, JSON.stringify({id: id, name: name})); } catch (e) {}
+  }
+  function loadLastProject() {
+    try { var raw = window.localStorage.getItem(LAST_PROJECT_KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+  }
+  function clearLastProject() {
+    try { window.localStorage.removeItem(LAST_PROJECT_KEY); } catch (e) {}
+  }
+
+  // ---- Reason banner: a trade page bounces back here (bootstrap()/goHome())
+  // when there's no live session or no project selected yet — explain why. ----
+  var REASON_MESSAGES = {
+    signin: 'Vui lòng đăng nhập để vào trang ngành.',
+    project: 'Vui lòng chọn một dự án ở mục "Dự án của tôi" bên dưới trước khi vào trang ngành.',
+    pending: 'Yêu cầu tham gia dự án của bạn đang chờ duyệt — chưa vào được trang ngành cho tới khi Trưởng dự án hoặc Admin duyệt.',
+    nolib: 'Không tải được thư viện kết nối (kiểm tra Internet rồi tải lại trang).',
+    error: 'Có lỗi khi kiểm tra phiên đăng nhập — vui lòng thử lại.'
+  };
+  (function showReasonBanner() {
+    var r = null;
+    try { r = new URLSearchParams(window.location.search).get('r'); } catch (e) {}
+    if (!r) return;
+    var el = document.getElementById('reasonBanner');
+    if (el) {
+      el.textContent = '⚠️ ' + (REASON_MESSAGES[r] || 'Vui lòng đăng nhập / chọn dự án trước khi vào trang ngành.');
+      el.style.display = 'flex';
+    }
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  })();
+
+  // ---- Auth: login/signup/reset-password/recovery — 4-mode design. "who am
+  // I" must be a cryptographic fact (auth.uid()) for per-item assignment
+  // restriction to be real rather than a UI convention. ----
+  var authOverlay = document.getElementById('authOverlay');
+  var authTitleEl = document.getElementById('authTitle');
+  var authIntroEl = document.getElementById('authIntro');
+  var authEmailFieldEl = document.getElementById('authEmailField');
+  var authEmailEl = document.getElementById('authEmail');
+  var authPasswordFieldEl = document.getElementById('authPasswordField');
+  var authPasswordLabelEl = document.getElementById('authPasswordLabel');
+  var authPasswordEl = document.getElementById('authPassword');
+  var authConfirmFieldEl = document.getElementById('authConfirmField');
+  var authPasswordConfirmEl = document.getElementById('authPasswordConfirm');
+  var authNameFieldEl = document.getElementById('authNameField');
+  var authDisplayNameEl = document.getElementById('authDisplayName');
+  var authForgotLineEl = document.getElementById('authForgotLine');
+  var authForgotLinkEl = document.getElementById('authForgotLink');
+  var authBtnSubmit = document.getElementById('authBtnSubmit');
+  var authErrorEl = document.getElementById('authError');
+  var authHintEl = document.getElementById('authHint');
+  var authMode = 'signin';
+  var AUTH_INTRO_SIGNIN = 'Đăng nhập bằng email để hệ thống biết chính xác bạn là ai — cần thiết để giao việc riêng cho từng người và chặn người khác tích hộ phần không phải của họ.';
+
+  function showAuthError(msg) { authErrorEl.textContent = msg; }
+  function setAuthBusy(busy) {
+    authBtnSubmit.disabled = busy;
+    if (busy) { authBtnSubmit.textContent = 'Processing...'; return; }
+    authBtnSubmit.textContent = authMode === 'signup' ? 'Sign Up' : authMode === 'reset' ? 'Send Reset Link' : authMode === 'recovery' ? 'Update Password' : 'Sign In';
+  }
+  function setAuthMode(mode) {
+    authMode = mode;
+    showAuthError('');
+    authPasswordEl.value = '';
+    authPasswordConfirmEl.value = '';
+    authPasswordLabelEl.textContent = 'Password';
+    authPasswordEl.placeholder = 'Minimum 6 characters';
+    authHintEl.style.display = '';
+    if (mode === 'signup') {
+      authTitleEl.textContent = 'Create Account';
+      authIntroEl.textContent = AUTH_INTRO_SIGNIN;
+      authEmailFieldEl.style.display = '';
+      authPasswordFieldEl.style.display = '';
+      authConfirmFieldEl.style.display = 'none';
+      authNameFieldEl.style.display = '';
+      authForgotLineEl.style.display = 'none';
+      authBtnSubmit.textContent = 'Sign Up';
+      authHintEl.innerHTML = 'Already have an account? <button type="button" class="switchprojlink">Sign In</button>';
+    } else if (mode === 'reset') {
+      authTitleEl.textContent = 'Reset Password';
+      authIntroEl.textContent = 'Nhập email đã đăng ký — hệ thống sẽ gửi 1 đường link để bạn đặt lại mật khẩu.';
+      authEmailFieldEl.style.display = '';
+      authPasswordFieldEl.style.display = 'none';
+      authConfirmFieldEl.style.display = 'none';
+      authNameFieldEl.style.display = 'none';
+      authForgotLineEl.style.display = 'none';
+      authBtnSubmit.textContent = 'Send Reset Link';
+      authHintEl.innerHTML = '<button type="button" class="switchprojlink">Back to Sign In</button>';
+    } else if (mode === 'recovery') {
+      authTitleEl.textContent = 'Set New Password';
+      authIntroEl.textContent = 'Nhập mật khẩu mới cho tài khoản của bạn.';
+      authEmailFieldEl.style.display = 'none';
+      authPasswordFieldEl.style.display = '';
+      authPasswordLabelEl.textContent = 'New password';
+      authConfirmFieldEl.style.display = '';
+      authNameFieldEl.style.display = 'none';
+      authForgotLineEl.style.display = 'none';
+      authBtnSubmit.textContent = 'Update Password';
+      authHintEl.style.display = 'none';
+    } else {
+      authTitleEl.textContent = 'Sign In';
+      authIntroEl.textContent = AUTH_INTRO_SIGNIN;
+      authEmailFieldEl.style.display = '';
+      authPasswordFieldEl.style.display = '';
+      authConfirmFieldEl.style.display = 'none';
+      authNameFieldEl.style.display = 'none';
+      authForgotLineEl.style.display = '';
+      authBtnSubmit.textContent = 'Sign In';
+      authHintEl.innerHTML = 'No account yet? <button type="button" class="switchprojlink">Create new account</button>';
+    }
+  }
+  authHintEl.addEventListener('click', function(e) {
+    if (!e.target.closest('button')) return;
+    if (authMode === 'reset') { setAuthMode('signin'); return; }
+    setAuthMode(authMode === 'signup' ? 'signin' : 'signup');
+  });
+  authForgotLinkEl.addEventListener('click', function() { setAuthMode('reset'); });
+
+  function ensureOwnProfile(user, displayNameIfKnown) {
+    return sb.from('profiles').select('user_id,display_name,email').eq('user_id', user.id).then(function(res) {
+      var existing = res.data && res.data[0];
+      if (existing && !displayNameIfKnown) return existing;
+      var name = displayNameIfKnown || (existing && existing.display_name) || (user.email || '').split('@')[0];
+      return sb.from('profiles').upsert({user_id: user.id, display_name: name, email: user.email}).then(function() {
+        return {user_id: user.id, display_name: name, email: user.email};
+      });
+    });
+  }
+
+  function onAuthed(user, displayName) {
+    CURRENT_USER = {id: user.id, email: user.email, display_name: displayName || (user.email || '')};
+    var badge = document.getElementById('userBadge');
+    badge.textContent = '👤 ' + CURRENT_USER.display_name;
+    badge.style.display = '';
+    document.getElementById('btnLogout').style.display = '';
+    document.getElementById('myProjectsCard').style.display = '';
+    authOverlay.style.display = 'none';
+    checkIsAdmin().then(function() {
+      var adminBtn = document.getElementById('btnAdminPanel');
+      if (adminBtn) adminBtn.style.display = IS_ADMIN ? '' : 'none';
+    });
+    refreshMyProjects().then(function(list) {
+      if (!list.length) {
+        // Brand-new account, never joined anything — open the join/create
+        // modal right away so they're not staring at an empty list.
+        gateNameEl.value = ''; gateCodeEl.value = '';
+        showGateError('');
+        gateOverlay.style.display = 'flex';
+      }
+    });
+  }
+
+  authBtnSubmit.addEventListener('click', function() {
+    var email = authEmailEl.value.trim();
+    var password = authPasswordEl.value;
+    showAuthError('');
+    if (!sb) { showAuthError('Could not load the connection library (check your Internet connection and reload the page).'); return; }
+    if (authMode === 'reset') {
+      if (!email) { showAuthError('Vui lòng nhập email.'); return; }
+      setAuthBusy(true);
+      sb.auth.resetPasswordForEmail(email, {redirectTo: window.location.href.split('#')[0].split('?')[0]}).then(function(res) {
+        setAuthBusy(false);
+        if (res.error) { showAuthError(res.error.message); return; }
+        showAuthError('Đã gửi email đặt lại mật khẩu tới ' + email + ' — mở email đó và làm theo hướng dẫn để đặt mật khẩu mới.');
+      }).catch(function(err) { setAuthBusy(false); showAuthError('Connection error: ' + err.message); });
+      return;
+    }
+    if (authMode === 'recovery') {
+      var confirmPw = authPasswordConfirmEl.value;
+      if (!password || password.length < 6) { showAuthError('Mật khẩu mới cần tối thiểu 6 ký tự.'); return; }
+      if (password !== confirmPw) { showAuthError('Hai mật khẩu nhập không khớp nhau.'); return; }
+      setAuthBusy(true);
+      sb.auth.updateUser({password: password}).then(function(res) {
+        setAuthBusy(false);
+        if (res.error) { showAuthError(res.error.message); return; }
+        authPasswordEl.value = ''; authPasswordConfirmEl.value = '';
+        var user = res.data && res.data.user;
+        if (user) {
+          ensureOwnProfile(user, null).then(function(profile) {
+            onAuthed(user, profile ? profile.display_name : (user.email || ''));
+          });
+        } else {
+          setAuthMode('signin');
+        }
+      }).catch(function(err) { setAuthBusy(false); showAuthError('Connection error: ' + err.message); });
+      return;
+    }
+    if (!email || !password) { showAuthError('Please enter both email and password.'); return; }
+    if (authMode === 'signup') {
+      var displayName = authDisplayNameEl.value.trim();
+      if (!displayName) { showAuthError('Please enter a display name.'); return; }
+      setAuthBusy(true);
+      sb.auth.signUp({email: email, password: password}).then(function(res) {
+        if (res.error) { setAuthBusy(false); showAuthError(res.error.message); return; }
+        var user = res.data && res.data.user;
+        if (!user || !res.data.session) {
+          setAuthBusy(false);
+          showAuthError('A confirmation email was sent to ' + email + '. Please open it, confirm, then come back and sign in.');
+          setAuthMode('signin');
+          return;
+        }
+        ensureOwnProfile(user, displayName).then(function() {
+          setAuthBusy(false);
+          onAuthed(user, displayName);
+        });
+      }).catch(function(err) { setAuthBusy(false); showAuthError('Connection error: ' + err.message); });
+    } else {
+      setAuthBusy(true);
+      sb.auth.signInWithPassword({email: email, password: password}).then(function(res) {
+        if (res.error) { setAuthBusy(false); showAuthError('Incorrect email or password.'); return; }
+        var user = res.data.user;
+        ensureOwnProfile(user, null).then(function(profile) {
+          setAuthBusy(false);
+          onAuthed(user, profile ? profile.display_name : (user.email || ''));
+        });
+      }).catch(function(err) { setAuthBusy(false); showAuthError('Connection error: ' + err.message); });
+    }
+  });
+  [authEmailEl, authPasswordEl, authPasswordConfirmEl, authDisplayNameEl].forEach(function(inp) {
+    inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') authBtnSubmit.click(); });
+  });
+
+  function doLogout() {
+    clearLastProject();
+    if (sb) sb.auth.signOut();
+    CURRENT_USER = null; MY_PROJECTS = []; IS_ADMIN = false;
+    document.getElementById('userBadge').style.display = 'none';
+    document.getElementById('userBadge').textContent = '';
+    document.getElementById('btnLogout').style.display = 'none';
+    var adminBtn = document.getElementById('btnAdminPanel');
+    if (adminBtn) adminBtn.style.display = 'none';
+    document.getElementById('myProjectsCard').style.display = 'none';
+    document.getElementById('myProjectsList').innerHTML = '<p class="dashempty">Đang tải...</p>';
+    gateOverlay.style.display = 'none';
+    adminOverlay.style.display = 'none';
+    authEmailEl.value = ''; authPasswordEl.value = ''; authDisplayNameEl.value = '';
+    setAuthMode('signin');
+    authOverlay.style.display = 'flex';
+  }
+  document.getElementById('btnLogout').addEventListener('click', doLogout);
+
+  // ---- Project gate: join an existing project (by name + access code) or
+  // create a brand-new one — same RPC every trade page used to call. On
+  // success this only refreshes "Dự án của tôi" below; it no longer jumps
+  // into a trade page automatically — picking a Ngành is a separate, deliberate
+  // step done from this same page. ----
+  var gateOverlay = document.getElementById('gateOverlay');
+  var gateNameEl = document.getElementById('gateProjectName');
+  var gateCodeEl = document.getElementById('gateAccessCode');
+  var gateBtn = document.getElementById('gateBtnEnter');
+  var gateErrorEl = document.getElementById('gateError');
+  var adminOverlay = document.getElementById('adminOverlay');
+
+  function showGateError(msg) { gateErrorEl.textContent = msg; }
+  function setGateBusy(busy) {
+    gateBtn.disabled = busy;
+    gateBtn.textContent = busy ? 'Connecting...' : 'Enter Project';
+  }
+
+  function enterProject(name, code) {
+    if (!name || !code) {
+      showGateError('Please enter both Project Name and Access Code.');
+      return;
+    }
+    if (!sb || !CURRENT_USER) { showGateError('Please sign in first.'); return; }
+    setGateBusy(true);
+    showGateError('');
+    sb.rpc('join_project', {p_name: name, p_code: code}).then(function(res) {
+      setGateBusy(false);
+      if (res.error) {
+        var errMsg = res.error.message || '';
+        var msg = errMsg.indexOf('WRONG_CODE') !== -1
+          ? ('Incorrect access code for project "' + name + '".')
+          : errMsg.indexOf('PROJECT_NOT_FOUND_ADMIN_ONLY') !== -1
+          ? ('Dự án "' + name + '" chưa tồn tại. Chỉ Admin mới tạo được dự án mới — liên hệ Admin để được tạo dự án và chỉ định Trưởng dự án.')
+          : ('Could not connect: ' + errMsg);
+        showGateError(msg);
+        return;
+      }
+      var newProjectId = res.data;
+      gateOverlay.style.display = 'none';
+      refreshMyProjects().then(function(list) {
+        var justJoined = list.filter(function(p) { return p.id === newProjectId; })[0];
+        // Only project CREATION (not joining an existing one) makes the
+        // creator its Lead automatically — so Admin + freshly-made 'lead'
+        // here reliably means "I just created this project." Nudge them
+        // straight to configuring its Ngành & Phase scope.
+        if (IS_ADMIN && justJoined && justJoined.my_role === 'lead') {
+          renderAdminPanel();
+          adminOverlay.style.display = 'flex';
+          setTimeout(function() {
+            alert('Dự án "' + name + '" đã được tạo. Hãy chọn (các) Ngành và Phase sẽ dùng cho dự án này bên dưới — bấm "⚙️ Ngành & Phase của dự án" ở đúng dòng dự án. Mặc định là dùng TẤT CẢ ngành/phase cho đến khi bạn thu hẹp lại.');
+          }, 50);
+        }
+      });
+    }).catch(function(err) {
+      setGateBusy(false);
+      showGateError('Network connection error: ' + err.message);
+    });
+  }
+
+  gateBtn.addEventListener('click', function() {
+    enterProject(gateNameEl.value.trim(), gateCodeEl.value.trim());
+  });
+  [gateNameEl, gateCodeEl].forEach(function(inp) {
+    inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') gateBtn.click(); });
+  });
+  document.getElementById('btnJoinProject').addEventListener('click', function() {
+    gateNameEl.value = ''; gateCodeEl.value = '';
+    showGateError('');
+    gateOverlay.style.display = 'flex';
+  });
+  var gateCloseBtn = document.getElementById('gateClose');
+  if (gateCloseBtn) {
+    gateCloseBtn.addEventListener('click', function() {
+      // Unlike on a trade page, closing here is always fine — Home has
+      // plenty else to look at even with zero projects joined yet.
+      showGateError('');
+      gateOverlay.style.display = 'none';
+    });
+  }
+
+  // ---- "Dự án của tôi": role-gated list of every project this account can
+  // see (Admin: ALL projects in the system; Lead/Staff: only projects
+  // they've joined, pending or approved) with Asset Code (access_code)
+  // shown ONLY for Admin and for the projects where this account is the
+  // Lead — never for Staff. Powered entirely by the list_my_projects_with_code()
+  // RPC (see add_home_projects_list.sql), which enforces the same rule
+  // server-side so it's a real restriction, not just a UI convention. ----
+  function renderMyProjectsList(list) {
+    var el = document.getElementById('myProjectsList');
+    if (!list.length) {
+      el.innerHTML = '<p class="dashempty">Bạn chưa tham gia dự án nào — bấm "+ Tham gia / Tạo dự án" ở trên.</p>';
+      return;
+    }
+    var last = loadLastProject();
+    el.innerHTML = list.map(function(p) {
+      var isPending = p.my_status === 'pending';
+      var isSelected = !!(last && last.id === p.id);
+      var roleLabel = p.is_admin ? '👑 Admin' : (p.my_role === 'lead' ? '🔑 Trưởng dự án' : '👤 Nhân viên');
+      var statusBadge = isPending ? '<span class="dash-pending">⏳ Đang chờ duyệt</span>' : '';
+      var codeLine = p.access_code
+        ? ('<div class="myprojectrow-code">Asset code: <b>' + esc(p.access_code) + '</b></div>')
+        : '';
+      var actionHtml = isPending
+        ? '<span class="dashempty">Chưa vào được — chờ duyệt</span>'
+        : ('<button type="button" class="toolbtn' + (isSelected ? ' primary' : '') + '" data-selectproject="' + esc(p.id) + '" data-name="' + esc(p.name) + '">' +
+           (isSelected ? '✓ Đang chọn' : 'Chọn dự án này') + '</button>');
+      return '<div class="myprojectrow' + (isSelected ? ' myprojectrow-selected' : '') + '">' +
+        '<div class="myprojectrow-main"><strong>' + esc(p.name) + '</strong><br><span class="dashempty">' + roleLabel + '</span>' + statusBadge + codeLine + '</div>' +
+        '<div class="myprojectrow-action">' + actionHtml + '</div>' +
+      '</div>';
+    }).join('');
+  }
+  document.getElementById('myProjectsList').addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-selectproject]');
+    if (!btn) return;
+    var id = btn.getAttribute('data-selectproject');
+    var name = btn.getAttribute('data-name');
+    saveLastProject(id, name);
+    renderMyProjectsList(MY_PROJECTS);
+    var note = document.getElementById('myProjectsNote');
+    if (note) {
+      note.textContent = '✓ Đã chọn "' + name + '" — giờ bấm vào 1 Ngành bên dưới để bắt đầu.';
+      note.style.display = '';
+    }
+  });
+  function refreshMyProjects() {
+    if (!sb || !CURRENT_USER) return Promise.resolve([]);
+    return sb.rpc('list_my_projects_with_code', {}).then(function(res) {
+      if (res.error) {
+        document.getElementById('myProjectsList').innerHTML = '<p class="dashempty">⚠️ Lỗi tải danh sách dự án: ' + esc(res.error.message) + '</p>';
+        return [];
+      }
+      MY_PROJECTS = res.data || [];
+      renderMyProjectsList(MY_PROJECTS);
+      return MY_PROJECTS;
+    }).catch(function() {
+      document.getElementById('myProjectsList').innerHTML = '<p class="dashempty">⚠️ Lỗi kết nối khi tải danh sách dự án.</p>';
+      return [];
+    });
+  }
+
+  // ---- Admin check + Admin panel (assign Trưởng dự án, configure Ngành &
+  // Phase scope per project) — Admin-only, now lives ONLY on this Home page. ----
+  function checkIsAdmin() {
+    if (!sb || !CURRENT_USER) { IS_ADMIN = false; return Promise.resolve(false); }
+    return sb.from('app_admins').select('user_id').eq('user_id', CURRENT_USER.id).then(function(res) {
+      IS_ADMIN = !res.error && !!(res.data && res.data.length);
+      return IS_ADMIN;
+    }).catch(function() { IS_ADMIN = false; return false; });
+  }
+
+  // Renders the 6-trade + (per enabled trade) 9-phase checkbox picker
+  // used in the Admin panel's per-project "⚙️ Ngành & Phase" section.
+  // enabledTrades is null (everything on) or an array of trade keys;
+  // phasesByTrade maps trade key -> null (everything on) or array of phase
+  // strings ('01'..'09').
+  function scopeCheckboxesHtml(projectId, enabledTrades, phasesByTrade) {
+    return TRADE_LIST.map(function(t) {
+      var tradeOn = !enabledTrades || enabledTrades.indexOf(t.key) !== -1;
+      var phasesForTrade = phasesByTrade[t.key] || null;
+      var phaseBoxes = PHASE_CODES.map(function(p) {
+        var phaseOn = !phasesForTrade || phasesForTrade.indexOf(p) !== -1;
+        return '<label class="scopephasecb"><input type="checkbox" class="scopephase" data-project="' + esc(projectId) + '" data-trade="' + esc(t.key) + '" data-phase="' + esc(p) + '"' + (phaseOn ? ' checked' : '') + '> Phase ' + esc(p) + '</label>';
+      }).join('');
+      return '<div class="scopetraderow">' +
+        '<label class="scopetradecb"><input type="checkbox" class="scopetrade" data-project="' + esc(projectId) + '" data-trade="' + esc(t.key) + '"' + (tradeOn ? ' checked' : '') + '> <b>' + esc(t.label) + '</b></label>' +
+        '<div class="scopephases" data-scopephases="' + esc(t.key) + '" style="display:' + (tradeOn ? '' : 'none') + '">' + phaseBoxes + '</div>' +
+      '</div>';
+    }).join('');
+  }
+  // Every project + who its Lead is, with a search box to (re)assign the
+  // Lead, plus which trades/phases each project actually uses, AND (new)
+  // its Asset Code — Admin-only (checked server-side via RLS/RPC too).
+  function renderAdminPanel() {
+    var listEl = document.getElementById('adminProjectsList');
+    listEl.innerHTML = '<p class="dashempty">Đang tải...</p>';
+    if (!sb) return;
+    sb.from('projects').select('id,name,access_code').then(function(pres) {
+      var projects = pres.data || [];
+      if (!projects.length) { listEl.innerHTML = '<p class="dashempty">Chưa có dự án nào. Tạo dự án mới qua nút "+ Tham gia / Tạo dự án".</p>'; return; }
+      var membersP = sb.from('project_members').select('project_id,user_id,role').eq('role', 'lead');
+      var tradesP = sb.from('project_trades').select('project_id,trade');
+      var tradePhasesP = sb.from('project_trade_phases').select('project_id,trade,phase');
+      Promise.all([membersP, tradesP, tradePhasesP]).then(function(results) {
+        var leadRows = results[0].data || [];
+        var tradeRows = results[1].data || [];
+        var tradePhaseRows = results[2].data || [];
+        var leadIds = leadRows.map(function(r) { return r.user_id; });
+        var profilesP = leadIds.length ? sb.from('profiles').select('user_id,display_name,email').in('user_id', leadIds) : Promise.resolve({data: []});
+        profilesP.then(function(prof) {
+          var profiles = prof.data || [];
+          function nameFor(uid) {
+            var p = profiles.filter(function(x) { return x.user_id === uid; })[0];
+            return p ? (p.display_name || p.email || uid) : uid;
+          }
+          listEl.innerHTML = projects.map(function(proj) {
+            var leads = leadRows.filter(function(r) { return r.project_id === proj.id; }).map(function(r) { return nameFor(r.user_id); });
+            var thisProjTrades = tradeRows.filter(function(r) { return r.project_id === proj.id; }).map(function(r) { return r.trade; });
+            var enabledTrades = thisProjTrades.length ? thisProjTrades : null;
+            var phasesByTrade = {};
+            TRADE_LIST.forEach(function(t) {
+              var rows = tradePhaseRows.filter(function(r) { return r.project_id === proj.id && r.trade === t.key; }).map(function(r) { return r.phase; });
+              phasesByTrade[t.key] = rows.length ? rows : null;
+            });
+            return '<div class="adminprojectrow" data-project="' + esc(proj.id) + '">' +
+              '<div><strong>' + esc(proj.name) + '</strong> — <span style="color:var(--accent);">Asset code: <b>' + esc(proj.access_code || '—') + '</b></span><br><span class="dashempty">Trưởng dự án hiện tại: ' + (leads.length ? esc(leads.join(', ')) : 'chưa có') + '</span></div>' +
+              '<div class="adminassignrow">' +
+                '<input type="email" class="adminleademail" data-project="' + esc(proj.id) + '" placeholder="email người sẽ làm Trưởng dự án" />' +
+                '<button type="button" class="toolbtn" data-setlead="' + esc(proj.id) + '">Đặt làm Trưởng dự án</button>' +
+              '</div>' +
+              '<div class="adminscopetoggle"><button type="button" class="toolbtn" data-scopetoggle="' + esc(proj.id) + '">⚙️ Ngành &amp; Phase của dự án</button></div>' +
+              '<div class="adminscopepanel" data-scopepanel="' + esc(proj.id) + '" style="display:none;">' +
+                '<p class="dashempty">Bỏ chọn 1 ngành = ngành đó ẩn hoàn toàn khỏi dự án này (mọi người, kể cả Admin). Với mỗi ngành còn chọn, bỏ chọn (các) Phase không dùng = Phase đó ẩn khỏi ngành này trong dự án. Phải giữ lại ít nhất 1 ngành và, với mỗi ngành, ít nhất 1 Phase.</p>' +
+                '<div class="scopetrades" data-scopetrades="' + esc(proj.id) + '">' + scopeCheckboxesHtml(proj.id, enabledTrades, phasesByTrade) + '</div>' +
+                '<button type="button" class="toolbtn" data-savescope="' + esc(proj.id) + '">💾 Lưu ngành &amp; Phase</button>' +
+              '</div></div>';
+          }).join('');
+        });
+      });
+    });
+  }
+  document.getElementById('adminProjectsList').addEventListener('click', function(e) {
+    var toggleBtn = e.target.closest('[data-scopetoggle]');
+    if (toggleBtn) {
+      var panel = document.querySelector('.adminscopepanel[data-scopepanel="' + toggleBtn.getAttribute('data-scopetoggle') + '"]');
+      if (panel) panel.style.display = panel.style.display === 'none' ? '' : 'none';
+      return;
+    }
+    var saveBtn = e.target.closest('[data-savescope]');
+    if (saveBtn) {
+      var projectId = saveBtn.getAttribute('data-savescope');
+      var scopeRoot = document.querySelector('.scopetrades[data-scopetrades="' + projectId + '"]');
+      if (!scopeRoot) return;
+      var checkedTrades = Array.prototype.slice.call(scopeRoot.querySelectorAll('input.scopetrade:checked')).map(function(cb) { return cb.getAttribute('data-trade'); });
+      if (!checkedTrades.length) { alert('Phải giữ lại ít nhất 1 ngành cho dự án.'); return; }
+      var perTradePhases = {};
+      var incomplete = false;
+      TRADE_LIST.forEach(function(t) {
+        var boxes = Array.prototype.slice.call(scopeRoot.querySelectorAll('input.scopephase[data-trade="' + t.key + '"]'));
+        var checked = boxes.filter(function(cb) { return cb.checked; }).map(function(cb) { return cb.getAttribute('data-phase'); });
+        if (checkedTrades.indexOf(t.key) !== -1 && !checked.length) incomplete = true;
+        perTradePhases[t.key] = checked;
+      });
+      if (incomplete) { alert('Mỗi ngành đã chọn phải giữ lại ít nhất 1 Phase.'); return; }
+      saveBtn.disabled = true; saveBtn.textContent = 'Đang lưu...';
+      sb.rpc('set_project_trades', {p_project_id: projectId, p_trades: checkedTrades}).then(function(res) {
+        if (res.error) throw new Error(res.error.message);
+        return Promise.all(TRADE_LIST.map(function(t) {
+          return sb.rpc('set_project_trade_phases', {p_project_id: projectId, p_trade: t.key, p_phases: perTradePhases[t.key]});
+        }));
+      }).then(function(results) {
+        var errs = results.filter(function(r) { return r && r.error; });
+        if (errs.length) { alert('Lỗi khi lưu Phase: ' + errs[0].error.message); }
+        renderAdminPanel();
+      }).catch(function(err) {
+        alert('Lỗi: ' + err.message);
+        saveBtn.disabled = false; saveBtn.textContent = '💾 Lưu ngành & Phase';
+      });
+      return;
+    }
+  });
+  document.getElementById('adminProjectsList').addEventListener('change', function(e) {
+    var scopeTradeCb = e.target.closest('input.scopetrade');
+    if (!scopeTradeCb) return;
+    var row = scopeTradeCb.closest('.scopetraderow');
+    var phasesBox = row ? row.querySelector('.scopephases') : null;
+    if (phasesBox) phasesBox.style.display = scopeTradeCb.checked ? '' : 'none';
+  });
+  document.getElementById('adminProjectsList').addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-setlead]');
+    if (!btn) return;
+    var projectId = btn.getAttribute('data-setlead');
+    var emailInput = document.querySelector('.adminleademail[data-project="' + projectId + '"]');
+    var email = emailInput ? emailInput.value.trim() : '';
+    if (!email) { alert('Nhập email của người sẽ làm Trưởng dự án.'); return; }
+    sb.from('profiles').select('user_id').eq('email', email).then(function(res) {
+      var row = res.data && res.data[0];
+      if (!row) { alert('Không tìm thấy tài khoản với email này — người đó cần đăng ký (Sign Up) trong app trước.'); return; }
+      sb.rpc('admin_set_lead', {p_project_id: projectId, p_user_id: row.user_id}).then(function(res2) {
+        if (res2.error) { alert('Lỗi: ' + res2.error.message); return; }
+        renderAdminPanel();
+      });
+    });
+  });
+  document.getElementById('btnAdminPanel').addEventListener('click', function() {
+    renderAdminPanel();
+    adminOverlay.style.display = 'flex';
+  });
+  document.getElementById('btnCloseAdmin').addEventListener('click', function() { adminOverlay.style.display = 'none'; });
+
+  // ---- Bootstrap: resume an existing login session if there is one,
+  // otherwise show the login/signup overlay. A password-reset email link
+  // lands back here with a recovery token in the URL; Supabase-js detects
+  // it and fires 'PASSWORD_RECOVERY' — when that happens we must show the
+  // "set new password" form instead of silently continuing into the app. ----
+  var recoveryInProgress = false;
+  if (sb) {
+    sb.auth.onAuthStateChange(function(event) {
+      if (event === 'PASSWORD_RECOVERY') {
+        recoveryInProgress = true;
+        authOverlay.style.display = 'flex';
+        setAuthMode('recovery');
+      }
+    });
+    sb.auth.getSession().then(function(res) {
+      if (recoveryInProgress) return;
+      var session = res.data && res.data.session;
+      if (session && session.user) {
+        ensureOwnProfile(session.user, null).then(function(profile) {
+          onAuthed(session.user, profile ? profile.display_name : (session.user.email || ''));
+        });
+      } else {
+        authOverlay.style.display = 'flex';
+      }
+    }).catch(function() {
+      if (!recoveryInProgress) authOverlay.style.display = 'flex';
+    });
+  } else {
+    authOverlay.style.display = 'flex';
+    showAuthError('Could not load the connection library (check your Internet connection and reload the page).');
+  }
+})();
+</script>
 </body>
 </html>

@@ -473,53 +473,6 @@
 </head>
 <body>
 
-<div class="gate-overlay" id="authOverlay">
-  <div class="gate-card">
-    <h2 id="authTitle">Log In</h2>
-    <p id="authIntro">Đăng nhập bằng email để hệ thống biết chính xác bạn là ai — cần thiết để giao việc riêng cho từng người và chặn người khác tích hộ phần không phải của họ.</p>
-    <div class="gate-field" id="authEmailField">
-      <label for="authEmail">Email</label>
-      <input type="email" id="authEmail" placeholder="you@company.com" />
-    </div>
-    <div class="gate-field" id="authPasswordField">
-      <label for="authPassword" id="authPasswordLabel">Password</label>
-      <input type="password" id="authPassword" placeholder="Minimum 6 characters" />
-    </div>
-    <div class="gate-field" id="authConfirmField" style="display:none;">
-      <label for="authPasswordConfirm">Confirm new password</label>
-      <input type="password" id="authPasswordConfirm" placeholder="Re-enter new password" />
-    </div>
-    <div class="gate-field" id="authNameField" style="display:none;">
-      <label for="authDisplayName">Display name (so others recognize you)</label>
-      <input type="text" id="authDisplayName" placeholder="e.g. Trieu Do - Detailer" />
-    </div>
-    <p class="gate-hint" id="authForgotLine" style="text-align:right;margin:-6px 0 10px;">
-      <button type="button" class="switchprojlink" id="authForgotLink">Forgot password?</button>
-    </p>
-    <button type="button" class="gate-btn" id="authBtnSubmit">Log In</button>
-    <div class="gate-error" id="authError"></div>
-    <p class="gate-hint" id="authHint">No account yet? <button type="button" class="switchprojlink" id="authToggleMode">Sign Up</button></p>
-  </div>
-</div>
-
-<div class="gate-overlay" id="gateOverlay" style="display:none;">
-  <div class="gate-card">
-    <button type="button" class="gate-close" id="gateClose" title="Close" aria-label="Close">✕</button>
-    <h2>Join / Create Project</h2>
-    <p>Nhập tên dự án và mã truy cập. Nếu tên dự án chưa từng dùng, hệ thống sẽ tự tạo mới với mã bạn nhập — hãy chia sẻ đúng tên + mã này cho những người cùng làm dự án để họ vào chung. Mọi người trong dự án đều thấy tiến độ của nhau theo thời gian thực; mục nào được giao riêng cho ai thì chỉ người đó tự tích được phần của mình.</p>
-    <div class="gate-field">
-      <label for="gateProjectName">Project Name</label>
-      <input type="text" id="gateProjectName" placeholder="e.g. Toa nha ABC - Block A" />
-    </div>
-    <div class="gate-field">
-      <label for="gateAccessCode">Access Code</label>
-      <input type="text" id="gateAccessCode" placeholder="e.g. abc123" />
-    </div>
-    <button type="button" class="gate-btn" id="gateBtnEnter">Join Project</button>
-    <div class="gate-error" id="gateError"></div>
-  </div>
-</div>
-
 <div class="gate-overlay" id="dashboardOverlay" style="display:none;align-items:flex-start;padding:40px 20px;">
   <div class="gate-card" style="max-width:900px;max-height:85vh;overflow-y:auto;">
     <h2 style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
@@ -540,16 +493,6 @@
   </div>
 </div>
 
-<div class="gate-overlay" id="pendingOverlay" style="display:none;">
-  <div class="gate-card">
-    <h2>⏳ Đang chờ duyệt</h2>
-    <p id="pendingMsg">Bạn đã gửi yêu cầu vào dự án này. Trưởng dự án (hoặc Admin) cần duyệt trước khi bạn xem/thao tác được dữ liệu. Vui lòng liên hệ họ, hoặc bấm "Kiểm tra lại" sau khi được duyệt.</p>
-    <button type="button" class="gate-btn" id="pendingRecheckBtn">↻ Kiểm tra lại</button>
-    <button type="button" class="gate-btn" id="pendingSwitchBtn" style="background:#fff;color:var(--accent);border:1px solid var(--accent);margin-top:8px;">Chọn / Tạo dự án khác</button>
-    <div class="gate-error" id="pendingError"></div>
-  </div>
-</div>
-
 <div class="gate-overlay" id="leadOverlay" style="display:none;align-items:flex-start;padding:40px 20px;">
   <div class="gate-card" style="max-width:640px;max-height:85vh;overflow-y:auto;">
     <h2 style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
@@ -561,17 +504,6 @@
     <h2 style="margin-top:22px;">🔧 Thành viên dự án &amp; Quản lý ngành</h2>
     <p style="font-size:12.5px;color:var(--sub);">Toàn bộ thành viên đã được duyệt của dự án này. Với Nhân viên, chỉnh lại (các) ngành họ được phép sửa — đổi ngay lập tức, không cần họ vào lại (bỏ tick hết = không giới hạn). Trưởng dự án và Admin luôn được sửa mọi ngành nên không có checkbox để giới hạn.</p>
     <div id="leadTradesList"></div>
-  </div>
-</div>
-
-<div class="gate-overlay" id="adminOverlay" style="display:none;align-items:flex-start;padding:40px 20px;">
-  <div class="gate-card" style="max-width:720px;max-height:85vh;overflow-y:auto;">
-    <h2 style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-      👑 Admin — Quản lý dự án
-      <button type="button" class="toolbtn" id="btnCloseAdmin" style="padding:4px 10px;">✕ Close</button>
-    </h2>
-    <p style="font-size:12.5px;color:var(--sub);">Chỉ Admin thấy được mục này: xem tất cả dự án và chỉ định Trưởng dự án cho từng dự án. Tạo dự án mới vẫn qua nút "+ Join Project" như bình thường — chỉ Admin mới tạo được dự án CHƯA từng có.</p>
-    <div id="adminProjectsList"></div>
   </div>
 </div>
 
@@ -605,14 +537,12 @@
     </div>
     <span class="userbadge" id="userBadge"></span>
     <select class="projectswitcher" id="projectSwitcher" style="display:none;" title="Switch project"></select>
-    <button type="button" class="toolbtn" id="btnJoinProject">+ Join Project</button>
     <button class="toolbtn danger" id="btnReset">↺ Reset All</button>
     <span class="savestatus" id="saveStatus"></span>
     <span class="syncstatus" id="syncStatus"><span class="dot"></span><span id="syncStatusText">No project selected</span></span>
     <span class="onlineusers" id="onlineUsers"></span>
     <button type="button" class="toolbtn" id="btnDashboard">📊 Dashboard</button>
     <button type="button" class="toolbtn" id="btnLeadApprovals" style="display:none;">✅ Duyệt thành viên</button>
-    <button type="button" class="toolbtn" id="btnAdminPanel" style="display:none;">👑 Admin</button>
     <button type="button" class="toolbtn" id="btnLogout">Log Out</button>
   </div>
 </div>
@@ -3637,92 +3567,19 @@ SPOOL → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMIT
 
   updateProgress();
 
-  // ---- Auth wiring: real login (email + password) is required before anything
-  // else, because "who am I" must be a cryptographic fact (auth.uid()) for
-  // per-item assignment restriction to be real rather than a UI convention. ----
-  var authOverlay = document.getElementById('authOverlay');
-  var authTitleEl = document.getElementById('authTitle');
-  var authIntroEl = document.getElementById('authIntro');
-  var authEmailFieldEl = document.getElementById('authEmailField');
-  var authEmailEl = document.getElementById('authEmail');
-  var authPasswordFieldEl = document.getElementById('authPasswordField');
-  var authPasswordLabelEl = document.getElementById('authPasswordLabel');
-  var authPasswordEl = document.getElementById('authPassword');
-  var authConfirmFieldEl = document.getElementById('authConfirmField');
-  var authPasswordConfirmEl = document.getElementById('authPasswordConfirm');
-  var authNameFieldEl = document.getElementById('authNameField');
-  var authDisplayNameEl = document.getElementById('authDisplayName');
-  var authForgotLineEl = document.getElementById('authForgotLine');
-  var authForgotLinkEl = document.getElementById('authForgotLink');
-  var authBtnSubmit = document.getElementById('authBtnSubmit');
-  var authErrorEl = document.getElementById('authError');
-  var authHintEl = document.getElementById('authHint');
-  var authMode = 'signin';
-  var AUTH_INTRO_SIGNIN = 'Đăng nhập bằng email để hệ thống biết chính xác bạn là ai — cần thiết để giao việc riêng cho từng người và chặn người khác tích hộ phần không phải của họ.';
+  // ---- Auth: login/signup/join-project/Admin-panel now all live ONLY on the
+  // Home page (index.html) — "who am I" must still be a cryptographic fact
+  // (auth.uid()) for per-item assignment restriction to be real rather than a
+  // UI convention, but the login UI itself doesn't need to be duplicated on
+  // every trade page. This page just needs to know who's logged in and which
+  // project was last selected on Home (see the bootstrap block at the very
+  // bottom of this script) — if either is missing it sends the visitor back
+  // to Home rather than showing its own login/join form. ----
+  var leadOverlay = document.getElementById('leadOverlay');
 
-  function showAuthError(msg) { authErrorEl.textContent = msg; }
-  function setAuthBusy(busy) {
-    authBtnSubmit.disabled = busy;
-    if (busy) { authBtnSubmit.textContent = 'Processing...'; return; }
-    authBtnSubmit.textContent = authMode === 'signup' ? 'Sign Up' : authMode === 'reset' ? 'Send Reset Link' : authMode === 'recovery' ? 'Update Password' : 'Sign In';
+  function goHome(reason) {
+    window.location.href = reason ? ('index.html?r=' + encodeURIComponent(reason)) : 'index.html';
   }
-  function setAuthMode(mode) {
-    authMode = mode;
-    showAuthError('');
-    authPasswordEl.value = '';
-    authPasswordConfirmEl.value = '';
-    authPasswordLabelEl.textContent = 'Password';
-    authPasswordEl.placeholder = 'Minimum 6 characters';
-    authHintEl.style.display = '';
-    if (mode === 'signup') {
-      authTitleEl.textContent = 'Create Account';
-      authIntroEl.textContent = AUTH_INTRO_SIGNIN;
-      authEmailFieldEl.style.display = '';
-      authPasswordFieldEl.style.display = '';
-      authConfirmFieldEl.style.display = 'none';
-      authNameFieldEl.style.display = '';
-      authForgotLineEl.style.display = 'none';
-      authBtnSubmit.textContent = 'Sign Up';
-      authHintEl.innerHTML = 'Already have an account? <button type="button" class="switchprojlink">Sign In</button>';
-    } else if (mode === 'reset') {
-      authTitleEl.textContent = 'Reset Password';
-      authIntroEl.textContent = 'Nhập email đã đăng ký — hệ thống sẽ gửi 1 đường link để bạn đặt lại mật khẩu.';
-      authEmailFieldEl.style.display = '';
-      authPasswordFieldEl.style.display = 'none';
-      authConfirmFieldEl.style.display = 'none';
-      authNameFieldEl.style.display = 'none';
-      authForgotLineEl.style.display = 'none';
-      authBtnSubmit.textContent = 'Send Reset Link';
-      authHintEl.innerHTML = '<button type="button" class="switchprojlink">Back to Sign In</button>';
-    } else if (mode === 'recovery') {
-      authTitleEl.textContent = 'Set New Password';
-      authIntroEl.textContent = 'Nhập mật khẩu mới cho tài khoản của bạn.';
-      authEmailFieldEl.style.display = 'none';
-      authPasswordFieldEl.style.display = '';
-      authPasswordLabelEl.textContent = 'New password';
-      authConfirmFieldEl.style.display = '';
-      authNameFieldEl.style.display = 'none';
-      authForgotLineEl.style.display = 'none';
-      authBtnSubmit.textContent = 'Update Password';
-      authHintEl.style.display = 'none';
-    } else {
-      authTitleEl.textContent = 'Sign In';
-      authIntroEl.textContent = AUTH_INTRO_SIGNIN;
-      authEmailFieldEl.style.display = '';
-      authPasswordFieldEl.style.display = '';
-      authConfirmFieldEl.style.display = 'none';
-      authNameFieldEl.style.display = 'none';
-      authForgotLineEl.style.display = '';
-      authBtnSubmit.textContent = 'Sign In';
-      authHintEl.innerHTML = 'No account yet? <button type="button" class="switchprojlink">Create new account</button>';
-    }
-  }
-  authHintEl.addEventListener('click', function(e) {
-    if (!e.target.closest('button')) return;
-    if (authMode === 'reset') { setAuthMode('signin'); return; }
-    setAuthMode(authMode === 'signup' ? 'signin' : 'signup');
-  });
-  authForgotLinkEl.addEventListener('click', function() { setAuthMode('reset'); });
 
   function ensureOwnProfile(user, displayNameIfKnown) {
     return sb.from('profiles').select('user_id,display_name,email').eq('user_id', user.id).then(function(res) {
@@ -3735,127 +3592,12 @@ SPOOL → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMIT
     });
   }
 
-  function onAuthed(user, displayName) {
-    CURRENT_USER = {id: user.id, email: user.email, display_name: displayName || (user.email || '')};
-    document.getElementById('userBadge').textContent = '👤 ' + CURRENT_USER.display_name;
-    authOverlay.style.display = 'none';
-    checkIsAdmin().then(updateRoleUi);
-    refreshMyProjects().then(function(list) {
-      if (!list.length) {
-        // Never joined a project on this account yet — must enter a name + code once.
-        gateOverlay.style.display = 'flex';
-        return;
-      }
-      var last = loadLastProject();
-      var match = last && list.filter(function(p) { return p.id === last.id; })[0];
-      var target = match || list[0];
-      openProject(target.id, target.name, target.access_code);
-    });
-  }
-
-  authBtnSubmit.addEventListener('click', function() {
-    var email = authEmailEl.value.trim();
-    var password = authPasswordEl.value;
-    showAuthError('');
-    if (!sb) { showAuthError('Could not load the connection library (check your Internet connection and reload the page).'); return; }
-    if (authMode === 'reset') {
-      if (!email) { showAuthError('Vui lòng nhập email.'); return; }
-      setAuthBusy(true);
-      sb.auth.resetPasswordForEmail(email, {redirectTo: window.location.href.split('#')[0].split('?')[0]}).then(function(res) {
-        setAuthBusy(false);
-        if (res.error) { showAuthError(res.error.message); return; }
-        showAuthError('Đã gửi email đặt lại mật khẩu tới ' + email + ' — mở email đó và làm theo hướng dẫn để đặt mật khẩu mới.');
-      }).catch(function(err) { setAuthBusy(false); showAuthError('Connection error: ' + err.message); });
-      return;
-    }
-    if (authMode === 'recovery') {
-      var confirmPw = authPasswordConfirmEl.value;
-      if (!password || password.length < 6) { showAuthError('Mật khẩu mới cần tối thiểu 6 ký tự.'); return; }
-      if (password !== confirmPw) { showAuthError('Hai mật khẩu nhập không khớp nhau.'); return; }
-      setAuthBusy(true);
-      sb.auth.updateUser({password: password}).then(function(res) {
-        setAuthBusy(false);
-        if (res.error) { showAuthError(res.error.message); return; }
-        authPasswordEl.value = ''; authPasswordConfirmEl.value = '';
-        var user = res.data && res.data.user;
-        if (user) {
-          ensureOwnProfile(user, null).then(function(profile) {
-            onAuthed(user, profile ? profile.display_name : (user.email || ''));
-          });
-        } else {
-          setAuthMode('signin');
-        }
-      }).catch(function(err) { setAuthBusy(false); showAuthError('Connection error: ' + err.message); });
-      return;
-    }
-    if (!email || !password) { showAuthError('Please enter both email and password.'); return; }
-    if (authMode === 'signup') {
-      var displayName = authDisplayNameEl.value.trim();
-      if (!displayName) { showAuthError('Please enter a display name.'); return; }
-      setAuthBusy(true);
-      sb.auth.signUp({email: email, password: password}).then(function(res) {
-        if (res.error) { setAuthBusy(false); showAuthError(res.error.message); return; }
-        var user = res.data && res.data.user;
-        if (!user || !res.data.session) {
-          setAuthBusy(false);
-          showAuthError('A confirmation email was sent to ' + email + '. Please open it, confirm, then come back and sign in.');
-          setAuthMode('signin');
-          return;
-        }
-        ensureOwnProfile(user, displayName).then(function() {
-          setAuthBusy(false);
-          onAuthed(user, displayName);
-        });
-      }).catch(function(err) { setAuthBusy(false); showAuthError('Connection error: ' + err.message); });
-    } else {
-      setAuthBusy(true);
-      sb.auth.signInWithPassword({email: email, password: password}).then(function(res) {
-        if (res.error) { setAuthBusy(false); showAuthError('Incorrect email or password.'); return; }
-        var user = res.data.user;
-        ensureOwnProfile(user, null).then(function(profile) {
-          setAuthBusy(false);
-          onAuthed(user, profile ? profile.display_name : (user.email || ''));
-        });
-      }).catch(function(err) { setAuthBusy(false); showAuthError('Connection error: ' + err.message); });
-    }
-  });
-  [authEmailEl, authPasswordEl, authPasswordConfirmEl, authDisplayNameEl].forEach(function(inp) {
-    inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') authBtnSubmit.click(); });
-  });
-
   function doLogout() {
     if (realtimeChannel && sb) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
-    CURRENT_PROJECT = null;
-    CURRENT_USER = null;
-    MY_PROJECTS = [];
-    IS_ADMIN = false; MY_ROLE = 'staff'; MY_STATUS = 'approved';
-    MY_TRADES = []; CAN_EDIT_THIS_TRADE = true;
-    PROJECT_TRADES_ENABLED = null; PROJECT_PHASES_ENABLED = null;
     clearLastProject();
     if (sb) sb.auth.signOut();
-    gateNameEl.value = ''; gateCodeEl.value = '';
-    showGateError('');
-    setSyncStatus('', 'No project selected');
-    gateOverlay.style.display = 'none';
-    pendingOverlay.style.display = 'none';
-    var switcherEl = document.getElementById('projectSwitcher');
-    if (switcherEl) { switcherEl.innerHTML = ''; switcherEl.style.display = 'none'; }
-    authEmailEl.value = ''; authPasswordEl.value = ''; authDisplayNameEl.value = '';
-    setAuthMode('signin');
-    authOverlay.style.display = 'flex';
+    goHome();
   }
-
-  // ---- Project gate wiring: pick/create a project (name + access code) after
-  // login. On success this hides the overlay and starts loading + subscribing
-  // to that project's shared progress in Supabase. ----
-  var gateOverlay = document.getElementById('gateOverlay');
-  var gateNameEl = document.getElementById('gateProjectName');
-  var gateCodeEl = document.getElementById('gateAccessCode');
-  var gateBtn = document.getElementById('gateBtnEnter');
-  var gateErrorEl = document.getElementById('gateError');
-  var pendingOverlay = document.getElementById('pendingOverlay');
-  var leadOverlay = document.getElementById('leadOverlay');
-  var adminOverlay = document.getElementById('adminOverlay');
 
   // ---- Admin/Lead role checks ----
   function checkIsAdmin() {
@@ -3892,9 +3634,9 @@ SPOOL → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMIT
     if (banner) banner.style.display = CAN_EDIT_THIS_TRADE ? 'none' : 'flex';
     var resetBtn = document.getElementById('btnReset');
     // Always set an explicit state (not just early-return when unlocked) —
-    // this runs fresh on every openProject() (login, project switch,
-    // pending-recheck), and a PREVIOUS project/account in the same page
-    // session may have left everything disabled from being trade-locked.
+    // this runs fresh on every enterProjectOnTradePage() (bootstrap, project
+    // switch), and a PREVIOUS project/account in the same page session may
+    // have left everything disabled from being trade-locked.
     // Per-item assignee-based disabling (renderCheckboxAssignMode etc.)
     // still applies normally afterward once startProjectSync() loads it.
     allEls.forEach(function(el) { el.disabled = !CAN_EDIT_THIS_TRADE; });
@@ -3958,21 +3700,13 @@ SPOOL → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMIT
       inp.title = canManage ? '' : 'Chỉ Trưởng dự án / Admin mới gán được nhân viên cho mục việc này.';
     });
     document.querySelectorAll('.assignitembtn').forEach(function(btn) { btn.style.display = canManage ? '' : 'none'; });
-    var adminBtn = document.getElementById('btnAdminPanel');
-    if (adminBtn) adminBtn.style.display = IS_ADMIN ? '' : 'none';
     var leadBtn = document.getElementById('btnLeadApprovals');
     if (leadBtn) leadBtn.style.display = canManage ? '' : 'none';
   }
 
-  function showGateError(msg) { gateErrorEl.textContent = msg; }
-  function setGateBusy(busy) {
-    gateBtn.disabled = busy;
-    gateBtn.textContent = busy ? 'Connecting...' : 'Enter Project';
-  }
-
   // ---- "My projects" dropdown: everything this account has already joined,
-  // so switching back to a known project is one click and never needs the
-  // access code again (the code is only needed once, via "+ Join Project"). ----
+  // so switching back to a known project (while staying on this trade page)
+  // is one click. Joining a NEW project only happens on the Home page now. ----
   function loadMyProjects() {
     if (!sb || !CURRENT_USER) return Promise.resolve([]);
     return sb.from('project_members').select('project_id').eq('user_id', CURRENT_USER.id).then(function(res) {
@@ -3998,30 +3732,26 @@ SPOOL → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMIT
     });
   }
 
-  function openProject(id, name, code, onReady) {
-    if (realtimeChannel && sb) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
-    CURRENT_PROJECT = {id: id, name: name, code: code};
-    saveLastProject(id, name);
-    showGateError('');
-    checkMyMembership(id).then(function(mem) {
+  // Entering a project on a trade page assumes Home already confirmed the
+  // account is an APPROVED member (that's the only way Home would have let
+  // them click through to a trade page for it). Still re-checks membership
+  // here as a defensive belt-and-suspenders — if it somehow comes back
+  // 'pending' (e.g. an approval was revoked, or stale localStorage), bounce
+  // back to Home rather than showing a pending screen this page no longer has.
+  function enterProjectOnTradePage(id, name) {
+    return checkMyMembership(id).then(function(mem) {
       MY_ROLE = mem.role; MY_STATUS = mem.status;
+      if (MY_STATUS === 'pending') { goHome('pending'); return; }
+      if (realtimeChannel && sb) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
+      CURRENT_PROJECT = {id: id, name: name, code: ''};
+      saveLastProject(id, name);
       updateRoleUi();
-      if (MY_STATUS === 'pending') {
-        gateOverlay.style.display = 'none';
-        document.getElementById('pendingMsg').textContent = 'Bạn đã gửi yêu cầu vào dự án "' + name + '". Trưởng dự án (hoặc Admin) cần duyệt trước khi bạn xem/thao tác được dữ liệu. Vui lòng liên hệ họ, hoặc bấm "Kiểm tra lại" sau khi được duyệt.';
-        pendingOverlay.style.display = 'flex';
-        setSyncStatus('', 'Đang chờ duyệt: ' + name);
-        return;
-      }
-      pendingOverlay.style.display = 'none';
-      gateOverlay.style.display = 'none';
       var sel = document.getElementById('projectSwitcher');
       if (sel) sel.value = id;
-      Promise.all([checkMyTrades(id), checkProjectScope(id)]).then(function() {
+      return Promise.all([checkMyTrades(id), checkProjectScope(id)]).then(function() {
         applyTradeLockUi();
         applyProjectScopeUi();
         startProjectSync();
-        if (onReady) onReady();
       });
     });
   }
@@ -4065,75 +3795,12 @@ SPOOL → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMIT
     });
   }
 
-  function enterProject(name, code) {
-    if (!name || !code) {
-      showGateError('Please enter both Project Name and Access Code.');
-      return;
-    }
-    if (!sb || !CURRENT_USER) { showGateError('Please sign in first.'); return; }
-    setGateBusy(true);
-    showGateError('');
-    sb.rpc('join_project', {p_name: name, p_code: code}).then(function(res) {
-      setGateBusy(false);
-      if (res.error) {
-        var errMsg = res.error.message || '';
-        var msg = errMsg.indexOf('WRONG_CODE') !== -1
-          ? ('Incorrect access code for project "' + name + '".')
-          : errMsg.indexOf('PROJECT_NOT_FOUND_ADMIN_ONLY') !== -1
-          ? ('Dự án "' + name + '" chưa tồn tại. Chỉ Admin mới tạo được dự án mới — liên hệ Admin để được tạo dự án và chỉ định Trưởng dự án.')
-          : ('Could not connect: ' + errMsg);
-        showGateError(msg);
-        return;
-      }
-      refreshMyProjects().then(function() {
-        openProject(res.data, name, code, function() {
-          // Only project CREATION (not joining an existing one) makes the
-          // creator its Lead automatically — so Admin + freshly-made 'lead'
-          // here reliably means "I just created this project." Nudge them
-          // straight to configuring its Ngành & Phase scope.
-          if (IS_ADMIN && MY_ROLE === 'lead') {
-            renderAdminPanel();
-            adminOverlay.style.display = 'flex';
-            setTimeout(function() {
-              alert('Dự án "' + name + '" đã được tạo. Hãy chọn (các) Ngành và Phase sẽ dùng cho dự án này bên dưới — bấm "⚙️ Ngành & Phase của dự án" ở đúng dòng dự án. Mặc định là dùng TẤT CẢ ngành/phase cho đến khi bạn thu hẹp lại.');
-            }, 50);
-          }
-        });
-      });
-    }).catch(function(err) {
-      setGateBusy(false);
-      showGateError('Network connection error: ' + err.message);
-    });
-  }
-
-  gateBtn.addEventListener('click', function() {
-    enterProject(gateNameEl.value.trim(), gateCodeEl.value.trim());
-  });
-  [gateNameEl, gateCodeEl].forEach(function(inp) {
-    inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') gateBtn.click(); });
-  });
-
-  document.getElementById('btnJoinProject').addEventListener('click', function() {
-    gateNameEl.value = ''; gateCodeEl.value = '';
-    showGateError('');
-    gateOverlay.style.display = 'flex';
-  });
-
-  var gateCloseBtn = document.getElementById('gateClose');
-  if (gateCloseBtn) {
-    gateCloseBtn.addEventListener('click', function() {
-      if (!CURRENT_PROJECT) return; // must join at least one project before this overlay can be dismissed
-      showGateError('');
-      gateOverlay.style.display = 'none';
-    });
-  }
-
   var projectSwitcherEl = document.getElementById('projectSwitcher');
   if (projectSwitcherEl) {
     projectSwitcherEl.addEventListener('change', function(e) {
       var id = e.target.value;
       var proj = MY_PROJECTS.filter(function(p) { return p.id === id; })[0];
-      if (proj) openProject(proj.id, proj.name, proj.access_code);
+      if (proj) enterProjectOnTradePage(proj.id, proj.name);
     });
   }
 
@@ -4488,188 +4155,31 @@ SPOOL → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMIT
   });
   document.getElementById('btnCloseLead').addEventListener('click', function() { leadOverlay.style.display = 'none'; });
 
-  // Renders the 5-trade + (per enabled trade) 9-phase checkbox picker used
-  // in the Admin panel's per-project "⚙️ Ngành & Phase" section. enabledTrades
-  // is null (everything on) or an array of trade keys; phasesByTrade maps
-  // trade key -> null (everything on) or array of phase strings ('01'..'09').
-  function scopeCheckboxesHtml(projectId, enabledTrades, phasesByTrade) {
-    return TRADE_LIST.map(function(t) {
-      var tradeOn = !enabledTrades || enabledTrades.indexOf(t.key) !== -1;
-      var phasesForTrade = phasesByTrade[t.key] || null;
-      var phaseBoxes = Object.keys(PHASE_TITLES).sort().map(function(p) {
-        var phaseOn = !phasesForTrade || phasesForTrade.indexOf(p) !== -1;
-        return '<label class="scopephasecb"><input type="checkbox" class="scopephase" data-project="' + esc(projectId) + '" data-trade="' + esc(t.key) + '" data-phase="' + esc(p) + '"' + (phaseOn ? ' checked' : '') + '> Phase ' + esc(p) + '</label>';
-      }).join('');
-      return '<div class="scopetraderow">' +
-        '<label class="scopetradecb"><input type="checkbox" class="scopetrade" data-project="' + esc(projectId) + '" data-trade="' + esc(t.key) + '"' + (tradeOn ? ' checked' : '') + '> <b>' + esc(t.label) + '</b></label>' +
-        '<div class="scopephases" data-scopephases="' + esc(t.key) + '" style="display:' + (tradeOn ? '' : 'none') + '">' + phaseBoxes + '</div>' +
-      '</div>';
-    }).join('');
-  }
-  // ---- Admin panel: every project + who its Lead is, with a search box to
-  // (re)assign the Lead, plus which trades/phases each project actually uses.
-  // Admin-only (checked server-side via RLS/RPC too). ----
-  function renderAdminPanel() {
-    var listEl = document.getElementById('adminProjectsList');
-    listEl.innerHTML = '<p class="dashempty">Đang tải...</p>';
-    if (!sb) return;
-    sb.from('projects').select('id,name').then(function(pres) {
-      var projects = pres.data || [];
-      if (!projects.length) { listEl.innerHTML = '<p class="dashempty">Chưa có dự án nào. Tạo dự án mới qua nút "+ Join Project".</p>'; return; }
-      var membersP = sb.from('project_members').select('project_id,user_id,role').eq('role', 'lead');
-      var tradesP = sb.from('project_trades').select('project_id,trade');
-      var tradePhasesP = sb.from('project_trade_phases').select('project_id,trade,phase');
-      Promise.all([membersP, tradesP, tradePhasesP]).then(function(results) {
-        var leadRows = results[0].data || [];
-        var tradeRows = results[1].data || [];
-        var tradePhaseRows = results[2].data || [];
-        var leadIds = leadRows.map(function(r) { return r.user_id; });
-        var profilesP = leadIds.length ? sb.from('profiles').select('user_id,display_name,email').in('user_id', leadIds) : Promise.resolve({data: []});
-        profilesP.then(function(prof) {
-          var profiles = prof.data || [];
-          function nameFor(uid) {
-            var p = profiles.filter(function(x) { return x.user_id === uid; })[0];
-            return p ? (p.display_name || p.email || uid) : uid;
-          }
-          listEl.innerHTML = projects.map(function(proj) {
-            var leads = leadRows.filter(function(r) { return r.project_id === proj.id; }).map(function(r) { return nameFor(r.user_id); });
-            var thisProjTrades = tradeRows.filter(function(r) { return r.project_id === proj.id; }).map(function(r) { return r.trade; });
-            var enabledTrades = thisProjTrades.length ? thisProjTrades : null;
-            var phasesByTrade = {};
-            TRADE_LIST.forEach(function(t) {
-              var rows = tradePhaseRows.filter(function(r) { return r.project_id === proj.id && r.trade === t.key; }).map(function(r) { return r.phase; });
-              phasesByTrade[t.key] = rows.length ? rows : null;
-            });
-            return '<div class="adminprojectrow" data-project="' + esc(proj.id) + '">' +
-              '<div><strong>' + esc(proj.name) + '</strong><br><span class="dashempty">Trưởng dự án hiện tại: ' + (leads.length ? esc(leads.join(', ')) : 'chưa có') + '</span></div>' +
-              '<div class="adminassignrow">' +
-                '<input type="email" class="adminleademail" data-project="' + esc(proj.id) + '" placeholder="email người sẽ làm Trưởng dự án" />' +
-                '<button type="button" class="toolbtn" data-setlead="' + esc(proj.id) + '">Đặt làm Trưởng dự án</button>' +
-              '</div>' +
-              '<div class="adminscopetoggle"><button type="button" class="toolbtn" data-scopetoggle="' + esc(proj.id) + '">⚙️ Ngành &amp; Phase của dự án</button></div>' +
-              '<div class="adminscopepanel" data-scopepanel="' + esc(proj.id) + '" style="display:none;">' +
-                '<p class="dashempty">Bỏ chọn 1 ngành = ngành đó ẩn hoàn toàn khỏi dự án này (mọi người, kể cả Admin). Với mỗi ngành còn chọn, bỏ chọn (các) Phase không dùng = Phase đó ẩn khỏi ngành này trong dự án. Phải giữ lại ít nhất 1 ngành và, với mỗi ngành, ít nhất 1 Phase.</p>' +
-                '<div class="scopetrades" data-scopetrades="' + esc(proj.id) + '">' + scopeCheckboxesHtml(proj.id, enabledTrades, phasesByTrade) + '</div>' +
-                '<button type="button" class="toolbtn" data-savescope="' + esc(proj.id) + '">💾 Lưu ngành &amp; Phase</button>' +
-              '</div></div>';
-          }).join('');
-        });
-      });
-    });
-  }
-  document.getElementById('adminProjectsList').addEventListener('click', function(e) {
-    var toggleBtn = e.target.closest('[data-scopetoggle]');
-    if (toggleBtn) {
-      var panel = document.querySelector('.adminscopepanel[data-scopepanel="' + toggleBtn.getAttribute('data-scopetoggle') + '"]');
-      if (panel) panel.style.display = panel.style.display === 'none' ? '' : 'none';
-      return;
-    }
-    var saveBtn = e.target.closest('[data-savescope]');
-    if (saveBtn) {
-      var projectId = saveBtn.getAttribute('data-savescope');
-      var scopeRoot = document.querySelector('.scopetrades[data-scopetrades="' + projectId + '"]');
-      if (!scopeRoot) return;
-      var checkedTrades = Array.prototype.slice.call(scopeRoot.querySelectorAll('input.scopetrade:checked')).map(function(cb) { return cb.getAttribute('data-trade'); });
-      if (!checkedTrades.length) { alert('Phải giữ lại ít nhất 1 ngành cho dự án.'); return; }
-      var perTradePhases = {};
-      var incomplete = false;
-      TRADE_LIST.forEach(function(t) {
-        var boxes = Array.prototype.slice.call(scopeRoot.querySelectorAll('input.scopephase[data-trade="' + t.key + '"]'));
-        var checked = boxes.filter(function(cb) { return cb.checked; }).map(function(cb) { return cb.getAttribute('data-phase'); });
-        if (checkedTrades.indexOf(t.key) !== -1 && !checked.length) incomplete = true;
-        perTradePhases[t.key] = checked;
-      });
-      if (incomplete) { alert('Mỗi ngành đã chọn phải giữ lại ít nhất 1 Phase.'); return; }
-      saveBtn.disabled = true; saveBtn.textContent = 'Đang lưu...';
-      sb.rpc('set_project_trades', {p_project_id: projectId, p_trades: checkedTrades}).then(function(res) {
-        if (res.error) throw new Error(res.error.message);
-        return Promise.all(TRADE_LIST.map(function(t) {
-          return sb.rpc('set_project_trade_phases', {p_project_id: projectId, p_trade: t.key, p_phases: perTradePhases[t.key]});
-        }));
-      }).then(function(results) {
-        var errs = results.filter(function(r) { return r && r.error; });
-        if (errs.length) { alert('Lỗi khi lưu Phase: ' + errs[0].error.message); }
-        renderAdminPanel();
-      }).catch(function(err) {
-        alert('Lỗi: ' + err.message);
-        saveBtn.disabled = false; saveBtn.textContent = '💾 Lưu ngành & Phase';
-      });
-      return;
-    }
-  });
-  document.getElementById('adminProjectsList').addEventListener('change', function(e) {
-    var scopeTradeCb = e.target.closest('input.scopetrade');
-    if (!scopeTradeCb) return;
-    var row = scopeTradeCb.closest('.scopetraderow');
-    var phasesBox = row ? row.querySelector('.scopephases') : null;
-    if (phasesBox) phasesBox.style.display = scopeTradeCb.checked ? '' : 'none';
-  });
-  document.getElementById('adminProjectsList').addEventListener('click', function(e) {
-    var btn = e.target.closest('[data-setlead]');
-    if (!btn) return;
-    var projectId = btn.getAttribute('data-setlead');
-    var emailInput = document.querySelector('.adminleademail[data-project="' + projectId + '"]');
-    var email = emailInput ? emailInput.value.trim() : '';
-    if (!email) { alert('Nhập email của người sẽ làm Trưởng dự án.'); return; }
-    sb.from('profiles').select('user_id').eq('email', email).then(function(res) {
-      var row = res.data && res.data[0];
-      if (!row) { alert('Không tìm thấy tài khoản với email này — người đó cần đăng ký (Sign Up) trong app trước.'); return; }
-      sb.rpc('admin_set_lead', {p_project_id: projectId, p_user_id: row.user_id}).then(function(res2) {
-        if (res2.error) { alert('Lỗi: ' + res2.error.message); return; }
-        renderAdminPanel();
-      });
-    });
-  });
-  document.getElementById('btnAdminPanel').addEventListener('click', function() {
-    renderAdminPanel();
-    adminOverlay.style.display = 'flex';
-  });
-  document.getElementById('btnCloseAdmin').addEventListener('click', function() { adminOverlay.style.display = 'none'; });
-
-  document.getElementById('pendingRecheckBtn').addEventListener('click', function() {
-    if (!CURRENT_PROJECT) return;
-    document.getElementById('pendingError').textContent = '';
-    openProject(CURRENT_PROJECT.id, CURRENT_PROJECT.name, CURRENT_PROJECT.code);
-  });
-  document.getElementById('pendingSwitchBtn').addEventListener('click', function() {
-    pendingOverlay.style.display = 'none';
-    gateNameEl.value = ''; gateCodeEl.value = '';
-    showGateError('');
-    gateOverlay.style.display = 'flex';
-  });
-
-  // ---- Bootstrap: resume an existing login session if there is one, otherwise
-  // show the login/signup overlay. Auto-reconnect to the last project happens
-  // inside onAuthed() once we actually know who is logged in. A password-reset
-  // email link lands back here with a recovery token in the URL; Supabase-js
-  // detects it and fires 'PASSWORD_RECOVERY' — when that happens we must show
-  // the "set new password" form instead of silently continuing into the app. ----
-  var recoveryInProgress = false;
-  if (sb) {
-    sb.auth.onAuthStateChange(function(event) {
-      if (event === 'PASSWORD_RECOVERY') {
-        recoveryInProgress = true;
-        authOverlay.style.display = 'flex';
-        setAuthMode('recovery');
-      }
-    });
+  // ---- Bootstrap: this trade page has no login/join UI of its own anymore —
+  // that all lives on the Home page (index.html) now. So this just needs to
+  // confirm (a) there's a live login session and (b) a project was already
+  // selected on Home (cached in the same shared localStorage key Home writes
+  // to) — if either is missing, bounce to Home so the visitor can sort it out
+  // there, then click back into this trade page once ready. ----
+  function bootstrap() {
+    if (!sb) { goHome('nolib'); return; }
     sb.auth.getSession().then(function(res) {
-      if (recoveryInProgress) return;
       var session = res.data && res.data.session;
-      if (session && session.user) {
-        ensureOwnProfile(session.user, null).then(function(profile) {
-          onAuthed(session.user, profile ? profile.display_name : (session.user.email || ''));
+      if (!session || !session.user) { goHome('signin'); return; }
+      var last = loadLastProject();
+      if (!last || !last.id) { goHome('project'); return; }
+      ensureOwnProfile(session.user, null).then(function(profile) {
+        CURRENT_USER = {id: session.user.id, email: session.user.email, display_name: profile ? profile.display_name : (session.user.email || '')};
+        document.getElementById('userBadge').textContent = '👤 ' + CURRENT_USER.display_name;
+        checkIsAdmin().then(function() {
+          refreshMyProjects().then(function() {
+            enterProjectOnTradePage(last.id, last.name);
+          });
         });
-      } else {
-        authOverlay.style.display = 'flex';
-      }
-    }).catch(function() {
-      if (!recoveryInProgress) authOverlay.style.display = 'flex';
-    });
-  } else {
-    authOverlay.style.display = 'flex';
-    showAuthError('Could not load the connection library (check your Internet connection and reload the page).');
+      });
+    }).catch(function() { goHome('error'); });
   }
+  bootstrap();
 })();
 </script>
 </body>
