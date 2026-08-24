@@ -477,18 +477,25 @@
   <div class="gate-card">
     <h2 id="authTitle">Log In</h2>
     <p id="authIntro">Đăng nhập bằng email để hệ thống biết chính xác bạn là ai — cần thiết để giao việc riêng cho từng người và chặn người khác tích hộ phần không phải của họ.</p>
-    <div class="gate-field">
+    <div class="gate-field" id="authEmailField">
       <label for="authEmail">Email</label>
       <input type="email" id="authEmail" placeholder="you@company.com" />
     </div>
-    <div class="gate-field">
-      <label for="authPassword">Password</label>
+    <div class="gate-field" id="authPasswordField">
+      <label for="authPassword" id="authPasswordLabel">Password</label>
       <input type="password" id="authPassword" placeholder="Minimum 6 characters" />
+    </div>
+    <div class="gate-field" id="authConfirmField" style="display:none;">
+      <label for="authPasswordConfirm">Confirm new password</label>
+      <input type="password" id="authPasswordConfirm" placeholder="Re-enter new password" />
     </div>
     <div class="gate-field" id="authNameField" style="display:none;">
       <label for="authDisplayName">Display name (so others recognize you)</label>
       <input type="text" id="authDisplayName" placeholder="e.g. Trieu Do - Detailer" />
     </div>
+    <p class="gate-hint" id="authForgotLine" style="text-align:right;margin:-6px 0 10px;">
+      <button type="button" class="switchprojlink" id="authForgotLink">Forgot password?</button>
+    </p>
     <button type="button" class="gate-btn" id="authBtnSubmit">Log In</button>
     <div class="gate-error" id="authError"></div>
     <p class="gate-hint" id="authHint">No account yet? <button type="button" class="switchprojlink" id="authToggleMode">Sign Up</button></p>
@@ -576,6 +583,7 @@
     <a href="flow_diagram_mp.html" class="tradelink" data-trade="mp">Mechanical Piping</a>
     <a href="flow_diagram_fp.html" class="tradelink" data-trade="fp">Fire Protection</a>
     <span class="tradelink tradelink-active" data-trade="el">Electrical</span>
+    <a href="flow_diagram_pp.html" class="tradelink" data-trade="pp">Process Piping</a>
 </div>
 <div class="navbar">
   <div class="navlinks">
@@ -2415,7 +2423,7 @@ PREFAB → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMI
   var CLIENT_ID = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   var PANEL_META = {"el-p01-s01": {"title": "401. Project Information – Lead/Checker _ Thông tin dự án – Lead/Checker", "phase": "01"}, "el-p01-s02": {"title": "402. Scope Check – Lead/Checker _ Kiểm tra phạm vi công việc – Lead/Checker", "phase": "01"}, "el-p01-s03": {"title": "403. Scope Boundary _ Ranh giới phạm vi công việc", "phase": "01"}, "el-p01-s04": {"title": "404. Input Documents _ Tài liệu đầu vào", "phase": "01"}, "el-p01-s05": {"title": "405. Latest Information Check _ Kiểm tra thông tin mới nhất", "phase": "01"}, "el-p01-s06": {"title": "406. Contract Review by Detailer _ Detailer đọc Contract", "phase": "01"}, "el-p01-s07": {"title": "407. Trace Design Intent _ Lần theo ý đồ thiết kế", "phase": "01"}, "el-p01-s08": {"title": "408. Document Conflict Check _ Kiểm tra mâu thuẫn tài liệu", "phase": "01"}, "el-p02-s01": {"title": "409. Model Setup _ Thiết lập Model", "phase": "02"}, "el-p02-s02": {"title": "410. Architecture Check _ Kiểm Architecture", "phase": "02"}, "el-p02-s03": {"title": "411. Structure Check _ Kiểm Structure", "phase": "02"}, "el-p02-s04": {"title": "412. Device / Fixture Check _ Kiểm thiết bị điện / đèn", "phase": "02"}, "el-p02-s05": {"title": "413. Equipment Check _ Kiểm Equipment", "phase": "02"}, "el-p02-s06": {"title": "414. Routing Strategy _ Chiến lược Routing", "phase": "02"}, "el-p02-s07": {"title": "415. Power Conduit / Feeder _ Conduit / Feeder cấp nguồn", "phase": "02"}, "el-p02-s08": {"title": "416. Lighting Conduit / Circuit _ Conduit / mạch chiếu sáng", "phase": "02"}, "el-p02-s09": {"title": "417. Cable Tray _ Máng cáp Cable Tray", "phase": "02"}, "el-p02-s10": {"title": "418. Busway _ Busway / thanh dẫn điện", "phase": "02"}, "el-p02-s11": {"title": "419. Grounding & Bonding _ Hệ tiếp địa & liên kết đẳng thế", "phase": "02"}, "el-p02-s12": {"title": "420. Fire Alarm / Low Voltage Conduit _ Conduit hệ báo cháy / hệ điện nhẹ", "phase": "02"}, "el-p02-s13": {"title": "421. Emergency / Life Safety Circuits _ Mạch khẩn cấp / an toàn sinh mạng", "phase": "02"}, "el-p02-s14": {"title": "422. Panelboard / Transformer Connections _ Kết nối Panelboard / Transformer", "phase": "02"}, "el-p03-s01": {"title": "423. Access / Maintenance _ Không gian tiếp cận / bảo trì", "phase": "03"}, "el-p03-s02": {"title": "424. Fireproofing & Firestop _ Chống cháy Conduit/Cáp & Firestop", "phase": "03"}, "el-p03-s03": {"title": "425. Hanger / Support _ Giá treo / hệ đỡ", "phase": "03"}, "el-p03-s04": {"title": "426. Penetration Strategy _ Chiến lược Sleeve / lỗ xuyên", "phase": "03"}, "el-p03-s05": {"title": "427. Deck / Floor Sleeve _ Sleeve xuyên Deck / sàn", "phase": "03"}, "el-p03-s06": {"title": "428. Wall / Roof Sleeve / Opening _ Sleeve tường / mái / Opening", "phase": "03"}, "el-p03-s07": {"title": "429. Core Drill _ Khoan Core", "phase": "03"}, "el-p03-s08": {"title": "430. Deck Insert _ Insert chôn sẵn trong Deck", "phase": "03"}, "el-p04-s01": {"title": "431. Elevation Check _ Kiểm cao độ", "phase": "04"}, "el-p04-s02": {"title": "432. Coordination _ Phối hợp", "phase": "04"}, "el-p04-s03": {"title": "433. Customer Issue / RFI _ Issue / RFI gửi khách hàng", "phase": "04"}, "el-p04-s04": {"title": "434. Customer Response _ Xử lý phản hồi khách hàng", "phase": "04"}, "el-p05-s01": {"title": "435. Trimble / Field Layout Point _ Điểm Trimble / Layout hiện trường", "phase": "05"}, "el-p05-s02": {"title": "436. Underground Stub-Up _ Điểm Conduit ngầm chờ lên", "phase": "05"}, "el-p05-s03": {"title": "437. Device Rough-In _ Điểm chờ thiết bị điện", "phase": "05"}, "el-p05-s04": {"title": "438. Field Layout Release _ Release Layout hiện trường", "phase": "05"}, "el-p05-s05": {"title": "439. Pour Schedule Control _ Kiểm soát tiến độ đổ bê tông", "phase": "05"}, "el-p06-s01": {"title": "440. Prefabrication Ready _ Xác nhận đủ điều kiện làm Prefab", "phase": "06"}, "el-p06-s02": {"title": "441. Prefab Planning / Break _ Lập kế hoạch / chia cụm Prefab", "phase": "06"}, "el-p06-s03": {"title": "442. Field Connection _ Điểm kết nối tại hiện trường", "phase": "06"}, "el-p06-s04": {"title": "443. Prefab Drawing / Ticket _ Bản vẽ / Ticket Prefab", "phase": "06"}, "el-p06-s05": {"title": "444. Prefab Dimension _ Dimension bản vẽ Prefab", "phase": "06"}, "el-p06-s06": {"title": "445. Prefab QC / Release _ QC Prefab / Release Fabrication", "phase": "06"}, "el-p07-s01": {"title": "446. BOM – Bill of Materials _ Bảng vật tư", "phase": "07"}, "el-p07-s02": {"title": "447. Pending / Hold Register _ Danh sách Pending / Hold", "phase": "07"}, "el-p07-s03": {"title": "448. Superseded File Control _ Quản lý file đã bị thay thế", "phase": "07"}, "el-p08-s01": {"title": "449. SHOP CONDUIT/TRAY – IFR – ISSUE FOR REVIEW _ SHOP CONDUIT/TRAY – PHÁT HÀNH ĐỂ KHÁCH HÀNG XEM XÉT", "phase": "08"}, "el-p08-s02": {"title": "450. IFR CUSTOMER COMMENTS _ XỬ LÝ COMMENT KHÁCH HÀNG SAU IFR", "phase": "08"}, "el-p08-s03": {"title": "451. IFA – ISSUE FOR APPROVAL – SHOP CONDUIT/TRAY _ SHOP CONDUIT/TRAY – PHÁT HÀNH ĐỂ PHÊ DUYỆT", "phase": "08"}, "el-p08-s04": {"title": "452. APPROVAL RESPONSE _ PHẢN HỒI PHÊ DUYỆT", "phase": "08"}, "el-p08-s05": {"title": "453. IFC – ISSUE FOR CONSTRUCTION – SHOP CONDUIT/TRAY _ SHOP CONDUIT/TRAY – PHÁT HÀNH ĐỂ THI CÔNG", "phase": "08"}, "el-p08-s06": {"title": "454. PDF / FILENAME / TRANSMITTAL – SHOP CONDUIT/TRAY _ KIỂM PDF / TÊN FILE / TRANSMITTAL – SHOP CONDUIT/TRAY", "phase": "08"}, "el-p08-s07": {"title": "455. SHOP CONDUIT SLEEVE – SLEEVE / PENETRATION DRAWING _ SHOP CONDUIT SLEEVE – BẢN VẼ SLEEVE / LỖ XUYÊN", "phase": "08"}, "el-p09-s01": {"title": "456. Constructability _ Khả năng thi công", "phase": "09"}, "el-p09-s02": {"title": "457. Detailer Self-Check _ Detailer tự kiểm", "phase": "09"}, "el-p09-s03": {"title": "458. Checker QC _ Checker kiểm QC", "phase": "09"}, "el-p09-s04": {"title": "459. QC Comment Update _ Cập nhật comment QC", "phase": "09"}, "el-p09-s05": {"title": "460. Revision Impact _ Kiểm ảnh hưởng Revision", "phase": "09"}, "el-p09-s06": {"title": "461. Field Feedback _ Phản hồi hiện trường", "phase": "09"}, "el-p09-s07": {"title": "462. Final Closeout _ Hoàn tất dự án/khu vực", "phase": "09"}, "el-p09-s08": {"title": "FINAL SIGN-OFF – DETAILER _ XÁC NHẬN CUỐI – DETAILER", "phase": "09"}, "el-p09-s09": {"title": "FINAL SIGN-OFF – LEAD/CHECKER _ XÁC NHẬN CUỐI – LEAD/CHECKER", "phase": "09"}};
   var PHASE_TITLES = {"01": "Project Setup", "02": "Modeling", "03": "Engineering & Supports", "04": "Coordination", "05": "Trimble / Field Layout", "06": "Prefabrication", "07": "BOM / Reports", "08": "Shop Conduit / Cable Tray Drawings", "09": "QC / Final Review"};
-  var TRADE_LIST = [{"key": "plumbing", "label": "Plumbing"}, {"key": "hvac", "label": "HVAC"}, {"key": "mp", "label": "Mechanical Piping"}, {"key": "fp", "label": "Fire Protection"}, {"key": "el", "label": "Electrical"}];
+  var TRADE_LIST = [{"key": "plumbing", "label": "Plumbing"}, {"key": "hvac", "label": "HVAC"}, {"key": "mp", "label": "Mechanical Piping"}, {"key": "fp", "label": "Fire Protection"}, {"key": "el", "label": "Electrical"}, {"key": "pp", "label": "Process Piping"}];
   var itemMeta = {};           // item_id -> {by, at} for answered items (drives the management dashboard)
   var ASSIGNMENTS = {};        // panel_id -> assignee name (soft, coordination-only "Giao cho" label)
   var assignInputs = Array.prototype.slice.call(document.querySelectorAll('.assigninput'));
@@ -3618,39 +3626,87 @@ PREFAB → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMI
   // per-item assignment restriction to be real rather than a UI convention. ----
   var authOverlay = document.getElementById('authOverlay');
   var authTitleEl = document.getElementById('authTitle');
+  var authIntroEl = document.getElementById('authIntro');
+  var authEmailFieldEl = document.getElementById('authEmailField');
   var authEmailEl = document.getElementById('authEmail');
+  var authPasswordFieldEl = document.getElementById('authPasswordField');
+  var authPasswordLabelEl = document.getElementById('authPasswordLabel');
   var authPasswordEl = document.getElementById('authPassword');
+  var authConfirmFieldEl = document.getElementById('authConfirmField');
+  var authPasswordConfirmEl = document.getElementById('authPasswordConfirm');
   var authNameFieldEl = document.getElementById('authNameField');
   var authDisplayNameEl = document.getElementById('authDisplayName');
+  var authForgotLineEl = document.getElementById('authForgotLine');
+  var authForgotLinkEl = document.getElementById('authForgotLink');
   var authBtnSubmit = document.getElementById('authBtnSubmit');
   var authErrorEl = document.getElementById('authError');
   var authHintEl = document.getElementById('authHint');
   var authMode = 'signin';
+  var AUTH_INTRO_SIGNIN = 'Đăng nhập bằng email để hệ thống biết chính xác bạn là ai — cần thiết để giao việc riêng cho từng người và chặn người khác tích hộ phần không phải của họ.';
 
   function showAuthError(msg) { authErrorEl.textContent = msg; }
   function setAuthBusy(busy) {
     authBtnSubmit.disabled = busy;
-    authBtnSubmit.textContent = busy ? 'Processing...' : (authMode === 'signup' ? 'Sign Up' : 'Sign In');
+    if (busy) { authBtnSubmit.textContent = 'Processing...'; return; }
+    authBtnSubmit.textContent = authMode === 'signup' ? 'Sign Up' : authMode === 'reset' ? 'Send Reset Link' : authMode === 'recovery' ? 'Update Password' : 'Sign In';
   }
   function setAuthMode(mode) {
     authMode = mode;
     showAuthError('');
+    authPasswordEl.value = '';
+    authPasswordConfirmEl.value = '';
+    authPasswordLabelEl.textContent = 'Password';
+    authPasswordEl.placeholder = 'Minimum 6 characters';
+    authHintEl.style.display = '';
     if (mode === 'signup') {
       authTitleEl.textContent = 'Create Account';
+      authIntroEl.textContent = AUTH_INTRO_SIGNIN;
+      authEmailFieldEl.style.display = '';
+      authPasswordFieldEl.style.display = '';
+      authConfirmFieldEl.style.display = 'none';
       authNameFieldEl.style.display = '';
+      authForgotLineEl.style.display = 'none';
       authBtnSubmit.textContent = 'Sign Up';
       authHintEl.innerHTML = 'Already have an account? <button type="button" class="switchprojlink">Sign In</button>';
+    } else if (mode === 'reset') {
+      authTitleEl.textContent = 'Reset Password';
+      authIntroEl.textContent = 'Nhập email đã đăng ký — hệ thống sẽ gửi 1 đường link để bạn đặt lại mật khẩu.';
+      authEmailFieldEl.style.display = '';
+      authPasswordFieldEl.style.display = 'none';
+      authConfirmFieldEl.style.display = 'none';
+      authNameFieldEl.style.display = 'none';
+      authForgotLineEl.style.display = 'none';
+      authBtnSubmit.textContent = 'Send Reset Link';
+      authHintEl.innerHTML = '<button type="button" class="switchprojlink">Back to Sign In</button>';
+    } else if (mode === 'recovery') {
+      authTitleEl.textContent = 'Set New Password';
+      authIntroEl.textContent = 'Nhập mật khẩu mới cho tài khoản của bạn.';
+      authEmailFieldEl.style.display = 'none';
+      authPasswordFieldEl.style.display = '';
+      authPasswordLabelEl.textContent = 'New password';
+      authConfirmFieldEl.style.display = '';
+      authNameFieldEl.style.display = 'none';
+      authForgotLineEl.style.display = 'none';
+      authBtnSubmit.textContent = 'Update Password';
+      authHintEl.style.display = 'none';
     } else {
       authTitleEl.textContent = 'Sign In';
+      authIntroEl.textContent = AUTH_INTRO_SIGNIN;
+      authEmailFieldEl.style.display = '';
+      authPasswordFieldEl.style.display = '';
+      authConfirmFieldEl.style.display = 'none';
       authNameFieldEl.style.display = 'none';
+      authForgotLineEl.style.display = '';
       authBtnSubmit.textContent = 'Sign In';
       authHintEl.innerHTML = 'No account yet? <button type="button" class="switchprojlink">Create new account</button>';
     }
   }
   authHintEl.addEventListener('click', function(e) {
     if (!e.target.closest('button')) return;
+    if (authMode === 'reset') { setAuthMode('signin'); return; }
     setAuthMode(authMode === 'signup' ? 'signin' : 'signup');
   });
+  authForgotLinkEl.addEventListener('click', function() { setAuthMode('reset'); });
 
   function ensureOwnProfile(user, displayNameIfKnown) {
     return sb.from('profiles').select('user_id,display_name,email').eq('user_id', user.id).then(function(res) {
@@ -3685,8 +3741,38 @@ PREFAB → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMI
     var email = authEmailEl.value.trim();
     var password = authPasswordEl.value;
     showAuthError('');
-    if (!email || !password) { showAuthError('Please enter both email and password.'); return; }
     if (!sb) { showAuthError('Could not load the connection library (check your Internet connection and reload the page).'); return; }
+    if (authMode === 'reset') {
+      if (!email) { showAuthError('Vui lòng nhập email.'); return; }
+      setAuthBusy(true);
+      sb.auth.resetPasswordForEmail(email, {redirectTo: window.location.href.split('#')[0].split('?')[0]}).then(function(res) {
+        setAuthBusy(false);
+        if (res.error) { showAuthError(res.error.message); return; }
+        showAuthError('Đã gửi email đặt lại mật khẩu tới ' + email + ' — mở email đó và làm theo hướng dẫn để đặt mật khẩu mới.');
+      }).catch(function(err) { setAuthBusy(false); showAuthError('Connection error: ' + err.message); });
+      return;
+    }
+    if (authMode === 'recovery') {
+      var confirmPw = authPasswordConfirmEl.value;
+      if (!password || password.length < 6) { showAuthError('Mật khẩu mới cần tối thiểu 6 ký tự.'); return; }
+      if (password !== confirmPw) { showAuthError('Hai mật khẩu nhập không khớp nhau.'); return; }
+      setAuthBusy(true);
+      sb.auth.updateUser({password: password}).then(function(res) {
+        setAuthBusy(false);
+        if (res.error) { showAuthError(res.error.message); return; }
+        authPasswordEl.value = ''; authPasswordConfirmEl.value = '';
+        var user = res.data && res.data.user;
+        if (user) {
+          ensureOwnProfile(user, null).then(function(profile) {
+            onAuthed(user, profile ? profile.display_name : (user.email || ''));
+          });
+        } else {
+          setAuthMode('signin');
+        }
+      }).catch(function(err) { setAuthBusy(false); showAuthError('Connection error: ' + err.message); });
+      return;
+    }
+    if (!email || !password) { showAuthError('Please enter both email and password.'); return; }
     if (authMode === 'signup') {
       var displayName = authDisplayNameEl.value.trim();
       if (!displayName) { showAuthError('Please enter a display name.'); return; }
@@ -3717,7 +3803,7 @@ PREFAB → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMI
       }).catch(function(err) { setAuthBusy(false); showAuthError('Connection error: ' + err.message); });
     }
   });
-  [authEmailEl, authPasswordEl, authDisplayNameEl].forEach(function(inp) {
+  [authEmailEl, authPasswordEl, authPasswordConfirmEl, authDisplayNameEl].forEach(function(inp) {
     inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') authBtnSubmit.click(); });
   });
 
@@ -4538,9 +4624,21 @@ PREFAB → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMI
 
   // ---- Bootstrap: resume an existing login session if there is one, otherwise
   // show the login/signup overlay. Auto-reconnect to the last project happens
-  // inside onAuthed() once we actually know who is logged in. ----
+  // inside onAuthed() once we actually know who is logged in. A password-reset
+  // email link lands back here with a recovery token in the URL; Supabase-js
+  // detects it and fires 'PASSWORD_RECOVERY' — when that happens we must show
+  // the "set new password" form instead of silently continuing into the app. ----
+  var recoveryInProgress = false;
   if (sb) {
+    sb.auth.onAuthStateChange(function(event) {
+      if (event === 'PASSWORD_RECOVERY') {
+        recoveryInProgress = true;
+        authOverlay.style.display = 'flex';
+        setAuthMode('recovery');
+      }
+    });
     sb.auth.getSession().then(function(res) {
+      if (recoveryInProgress) return;
       var session = res.data && res.data.session;
       if (session && session.user) {
         ensureOwnProfile(session.user, null).then(function(profile) {
@@ -4550,7 +4648,7 @@ PREFAB → BOM → IFC → MODEL → HIỆN TRẠNG FIELD → CONTRACT → SUBMI
         authOverlay.style.display = 'flex';
       }
     }).catch(function() {
-      authOverlay.style.display = 'flex';
+      if (!recoveryInProgress) authOverlay.style.display = 'flex';
     });
   } else {
     authOverlay.style.display = 'flex';
