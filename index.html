@@ -178,6 +178,8 @@
   .switchprojlink{font-size:11.5px;color:var(--accent);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;}
 
   .adminprojectrow{display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .adminprojectrow-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .adminprojectrow-selected{background:#f3f8fc;margin:0 -10px;padding:10px;border-radius:8px;border-bottom:1px solid transparent;}
   .adminassignrow{display:flex;gap:6px;flex:none;}
   .adminleademail{font-size:12px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;min-width:200px;}
   .adminscopetoggle{display:flex;}
@@ -526,19 +528,33 @@
     badge.textContent = '👤 ' + CURRENT_USER.display_name;
     badge.style.display = '';
     document.getElementById('btnLogout').style.display = '';
-    document.getElementById('myProjectsCard').style.display = '';
     authOverlay.style.display = 'none';
     checkIsAdmin().then(function() {
       var adminBtn = document.getElementById('btnAdminPanel');
       if (adminBtn) adminBtn.style.display = IS_ADMIN ? '' : 'none';
-    });
-    refreshMyProjects().then(function(list) {
-      if (!list.length) {
-        // Brand-new account, never joined anything — open the join/create
-        // modal right away so they're not staring at an empty list.
-        gateNameEl.value = ''; gateCodeEl.value = '';
-        showGateError('');
-        gateOverlay.style.display = 'flex';
+      if (IS_ADMIN) {
+        // Admin's project chooser IS the full "👑 Admin — Quản lý dự án" list
+        // below (every project in the system, with Asset Code + its own
+        // "Chọn dự án này" button per row) — there is no separate personal
+        // "Dự án của tôi" card for Admin. Showing both side by side just
+        // duplicated the same handful of projects under two different,
+        // confusing labels; this replaces that card outright for Admin.
+        document.getElementById('myProjectsCard').style.display = 'none';
+        renderAdminPanel();
+        document.getElementById('adminProjectsCard').style.display = 'block';
+        var last = loadLastProject();
+        refreshTradeScopeForSelectedProject(last && last.id);
+      } else {
+        document.getElementById('myProjectsCard').style.display = '';
+        refreshMyProjects().then(function(list) {
+          if (!list.length) {
+            // Brand-new account, never joined anything — open the join/create
+            // modal right away so they're not staring at an empty list.
+            gateNameEl.value = ''; gateCodeEl.value = '';
+            showGateError('');
+            gateOverlay.style.display = 'flex';
+          }
+        });
       }
     });
   }
@@ -859,6 +875,7 @@
         var profilesP = leadIds.length ? sb.from('profiles').select('user_id,display_name,email').in('user_id', leadIds) : Promise.resolve({data: []});
         profilesP.then(function(prof) {
           var profiles = prof.data || [];
+          var last = loadLastProject();
           function nameFor(uid) {
             var p = profiles.filter(function(x) { return x.user_id === uid; })[0];
             return p ? (p.display_name || p.email || uid) : uid;
@@ -872,8 +889,12 @@
               var rows = tradePhaseRows.filter(function(r) { return r.project_id === proj.id && r.trade === t.key; }).map(function(r) { return r.phase; });
               phasesByTrade[t.key] = rows.length ? rows : null;
             });
-            return '<div class="adminprojectrow" data-project="' + esc(proj.id) + '">' +
-              '<div><strong>' + esc(proj.name) + '</strong> — <span style="color:var(--accent);">Asset code: <b>' + esc(proj.access_code || '—') + '</b></span><br><span class="dashempty">Trưởng dự án hiện tại: ' + (leads.length ? esc(leads.join(', ')) : 'chưa có') + '</span></div>' +
+            var isSelected = !!(last && last.id === proj.id);
+            return '<div class="adminprojectrow' + (isSelected ? ' adminprojectrow-selected' : '') + '" data-project="' + esc(proj.id) + '">' +
+              '<div class="adminprojectrow-head">' +
+                '<div><strong>' + esc(proj.name) + '</strong> — <span style="color:var(--accent);">Asset code: <b>' + esc(proj.access_code || '—') + '</b></span><br><span class="dashempty">Trưởng dự án hiện tại: ' + (leads.length ? esc(leads.join(', ')) : 'chưa có') + '</span></div>' +
+                '<button type="button" class="toolbtn' + (isSelected ? ' primary' : '') + '" data-selectproject="' + esc(proj.id) + '" data-name="' + esc(proj.name) + '">' + (isSelected ? '✓ Đang chọn' : 'Chọn dự án này') + '</button>' +
+              '</div>' +
               '<div class="adminassignrow">' +
                 '<input type="email" class="adminleademail" data-project="' + esc(proj.id) + '" placeholder="email người sẽ làm Trưởng dự án" />' +
                 '<button type="button" class="toolbtn" data-setlead="' + esc(proj.id) + '">Đặt làm Trưởng dự án</button>' +
@@ -890,6 +911,13 @@
     });
   }
   document.getElementById('adminProjectsList').addEventListener('click', function(e) {
+    var selectBtn = e.target.closest('[data-selectproject]');
+    if (selectBtn) {
+      saveLastProject(selectBtn.getAttribute('data-selectproject'), selectBtn.getAttribute('data-name'));
+      renderAdminPanel();
+      refreshTradeScopeForSelectedProject(selectBtn.getAttribute('data-selectproject'));
+      return;
+    }
     var toggleBtn = e.target.closest('[data-scopetoggle]');
     if (toggleBtn) {
       var panel = document.querySelector('.adminscopepanel[data-scopepanel="' + toggleBtn.getAttribute('data-scopetoggle') + '"]');
