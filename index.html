@@ -213,6 +213,14 @@
     <div id="myProjectsList"><p class="dashempty">Đang tải...</p></div>
   </div>
 
+  <div class="card" id="adminProjectsCard" style="display:none;">
+    <h2><span class="tag">ADMIN</span> Danh sách dự án (Admin)
+      <button type="button" class="toolbtn" id="btnCloseAdmin" style="margin-left:auto;padding:4px 10px;">✕ Ẩn</button>
+    </h2>
+    <p style="font-size:12.5px;color:var(--sub);">Chỉ Admin thấy được mục này: xem tất cả dự án kèm Asset Code, và chỉ định Trưởng dự án cho từng dự án. Tạo dự án mới vẫn qua nút "+ Tham gia / Tạo dự án" như bình thường — chỉ Admin mới tạo được dự án CHƯA từng có.</p>
+    <div id="adminProjectsList"></div>
+  </div>
+
   <div class="card">
     <h2><span class="tag">NGÀNH</span> Chọn ngành để vào checklist</h2>
     <p class="tradepicker-note" id="tradepickerNote">Ngành hiển thị mờ = không thuộc phạm vi dự án đang chọn (do Admin cấu hình ở "⚙️ Ngành &amp; Phase của dự án") — chưa vào được, chọn dự án khác ở trên hoặc liên hệ Admin.</p>
@@ -360,17 +368,6 @@
     </div>
     <button type="button" class="gate-btn" id="gateBtnEnter">Join Project</button>
     <div class="gate-error" id="gateError"></div>
-  </div>
-</div>
-
-<div class="gate-overlay" id="adminOverlay" style="display:none;align-items:flex-start;padding:40px 20px;">
-  <div class="gate-card" style="max-width:720px;max-height:85vh;overflow-y:auto;">
-    <h2 style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-      👑 Admin — Quản lý dự án
-      <button type="button" class="toolbtn" id="btnCloseAdmin" style="padding:4px 10px;">✕ Close</button>
-    </h2>
-    <p style="font-size:12.5px;color:var(--sub);">Chỉ Admin thấy được mục này: xem tất cả dự án kèm Asset Code, và chỉ định Trưởng dự án cho từng dự án. Tạo dự án mới vẫn qua nút "+ Tham gia / Tạo dự án" như bình thường — chỉ Admin mới tạo được dự án CHƯA từng có.</p>
-    <div id="adminProjectsList"></div>
   </div>
 </div>
 
@@ -628,7 +625,7 @@
     document.getElementById('myProjectsCard').style.display = 'none';
     document.getElementById('myProjectsList').innerHTML = '<p class="dashempty">Đang tải...</p>';
     gateOverlay.style.display = 'none';
-    adminOverlay.style.display = 'none';
+    adminProjectsCard.style.display = 'none';
     authEmailEl.value = ''; authPasswordEl.value = ''; authDisplayNameEl.value = '';
     setAuthMode('signin');
     authOverlay.style.display = 'flex';
@@ -645,7 +642,9 @@
   var gateCodeEl = document.getElementById('gateAccessCode');
   var gateBtn = document.getElementById('gateBtnEnter');
   var gateErrorEl = document.getElementById('gateError');
-  var adminOverlay = document.getElementById('adminOverlay');
+  // Admin panel now lives as a normal in-page card (not a modal) — see
+  // adminProjectsCard below, revealed/hidden via the "👑 Admin"/"✕ Ẩn" buttons.
+  var adminProjectsCard = document.getElementById('adminProjectsCard');
 
   function showGateError(msg) { gateErrorEl.textContent = msg; }
   function setGateBusy(busy) {
@@ -683,7 +682,8 @@
         // straight to configuring its Ngành & Phase scope.
         if (IS_ADMIN && justJoined && justJoined.my_role === 'lead') {
           renderAdminPanel();
-          adminOverlay.style.display = 'flex';
+          adminProjectsCard.style.display = 'block';
+          adminProjectsCard.scrollIntoView({behavior: 'smooth', block: 'start'});
           setTimeout(function() {
             alert('Dự án "' + name + '" đã được tạo. Hãy chọn (các) Ngành và Phase sẽ dùng cho dự án này bên dưới — bấm "⚙️ Ngành & Phase của dự án" ở đúng dòng dự án. Mặc định là dùng TẤT CẢ ngành/phase cho đến khi bạn thu hẹp lại.');
           }, 50);
@@ -949,9 +949,10 @@
   });
   document.getElementById('btnAdminPanel').addEventListener('click', function() {
     renderAdminPanel();
-    adminOverlay.style.display = 'flex';
+    adminProjectsCard.style.display = 'block';
+    adminProjectsCard.scrollIntoView({behavior: 'smooth', block: 'start'});
   });
-  document.getElementById('btnCloseAdmin').addEventListener('click', function() { adminOverlay.style.display = 'none'; });
+  document.getElementById('btnCloseAdmin').addEventListener('click', function() { adminProjectsCard.style.display = 'none'; });
 
   // ---- Bootstrap: resume an existing login session if there is one,
   // otherwise show the login/signup overlay. A password-reset email link
