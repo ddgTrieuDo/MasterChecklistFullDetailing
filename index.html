@@ -306,7 +306,7 @@
       Ứng dụng có 3 cấp quyền độc lập với vai trò BIM/MEP ở trên — quyền này quyết định ai được giao việc, duyệt thành viên, tạo dự án mới:
     </p>
     <div class="legend legend-prose">
-      <div class="item"><span class="swatch" style="background:#c9922e"></span><span class="itemtext"><b>👑 Admin</b> — cấp cao nhất. Là người duy nhất tạo được dự án mới, và chỉ Admin mới chỉ định ai làm Trưởng dự án cho từng dự án (qua nút <b>"👑 Admin"</b> ở trang Home này, chỉ Admin mới thấy nút này). Admin cũng là người chọn (các) Ngành và (các) Phase mà một dự án thực sự dùng, và luôn thấy được danh sách TOÀN BỘ dự án trong hệ thống kèm Asset Code của từng dự án ở mục "Dự án của tôi" bên trên.</span></div>
+      <div class="item"><span class="swatch" style="background:#c9922e"></span><span class="itemtext"><b>👑 Admin</b> — cấp cao nhất. Là người duy nhất tạo được dự án mới, và chỉ Admin mới chỉ định ai làm Trưởng dự án cho từng dự án (qua nút <b>"👑 Admin"</b> ở trang Home này, chỉ Admin mới thấy nút này). Admin cũng là người chọn (các) Ngành và (các) Phase mà một dự án thực sự dùng, và luôn thấy được danh sách TOÀN BỘ dự án trong hệ thống kèm Asset Code của từng dự án ở khối "👑 Admin — Quản lý dự án" đó — khác với mục "Dự án của tôi" ở trên (mục đó chỉ liệt kê những dự án Admin cũng đang thực sự tham gia, giống mọi tài khoản khác).</span></div>
       <div class="item"><span class="swatch" style="background:#7c4fd6"></span><span class="itemtext"><b>Trưởng dự án</b> — do Admin chỉ định riêng cho từng dự án. Được quyền giao việc cho nhân viên (ô "Giao cho" + nút "👤+"), duyệt/từ chối nhân viên mới xin vào dự án, và chỉ định nhân viên được sửa (các) ngành nào — tất cả qua nút <b>"✅ Duyệt thành viên"</b> trên thanh công cụ của trang ngành (chỉ Trưởng dự án/Admin mới thấy nút này). Trưởng dự án luôn sửa được TẤT CẢ các ngành trong dự án của mình, không bị giới hạn theo ngành, và thấy được Asset Code của (các) dự án mình làm Trưởng dự án ở mục "Dự án của tôi".</span></div>
       <div class="item"><span class="swatch" style="background:#2c6ea6"></span><span class="itemtext"><b>Nhân viên</b> — mặc định khi tham gia dự án. Chỉ tích/chọn được các mục mình được giao (hoặc mục dùng chung, không giao riêng ai) — không giao việc được cho người khác, ô "Giao cho" và nút "👤+" sẽ bị khoá/ẩn. Nhân viên KHÔNG thấy Asset Code của bất kỳ dự án nào trong "Dự án của tôi" — mục này chỉ hiện tên dự án và trạng thái tham gia.</span></div>
     </div>
@@ -733,7 +733,12 @@
     el.innerHTML = list.map(function(p) {
       var isPending = p.my_status === 'pending';
       var isSelected = !!(last && last.id === p.id);
-      var roleLabel = p.is_admin ? '👑 Admin' : (p.my_role === 'lead' ? '🔑 Trưởng dự án' : '👤 Nhân viên');
+      // Show the REAL per-project role first (Lead/Staff), then append a
+      // 👑 Admin tag if this account is a site-wide Admin — is_admin is a
+      // global flag, not a per-project role, so it must never REPLACE the
+      // actual role (that previously made every one of an Admin's own rows
+      // read "👑 Admin" regardless of whether they were Lead or Staff there).
+      var roleLabel = (p.my_role === 'lead' ? '🔑 Trưởng dự án' : '👤 Nhân viên') + (p.is_admin ? ' · 👑 Admin' : '');
       var statusBadge = isPending ? '<span class="dash-pending">⏳ Đang chờ duyệt</span>' : '';
       var codeLine = p.access_code
         ? ('<div class="myprojectrow-code">Asset code: <b>' + esc(p.access_code) + '</b></div>')
