@@ -88,6 +88,15 @@
   .tradecard-emoji{font-size:30px;}
   .tradecard-label{font-size:14px;font-weight:700;margin-top:4px;}
   .tradecard-sub{font-size:12px;color:var(--sub);}
+  /* A trade NOT enabled (via Admin's Ngành/Phase scope, see project_trades)
+     for the currently-selected project (in "Dự án của tôi") is dimmed and
+     unclickable here — mirrors the same project_trades rule a trade page
+     itself enforces (checkProjectScope/applyProjectScopeUi), just shown a
+     step earlier so picking a wrong-scope Ngành is never even possible. */
+  .tradecard-scoped-out{
+    opacity:.4;filter:grayscale(70%);pointer-events:none;
+  }
+  .tradepicker-note{font-size:12px;color:var(--sub);margin:0 0 12px;display:none;}
 
   /* ---- Top account bar: userBadge + Logout + Admin (Admin-only, Home-only). ---- */
   .accountbar{
@@ -206,7 +215,8 @@
 
   <div class="card">
     <h2><span class="tag">NGÀNH</span> Chọn ngành để vào checklist</h2>
-    <div class="tradepicker">
+    <p class="tradepicker-note" id="tradepickerNote">Ngành hiển thị mờ = không thuộc phạm vi dự án đang chọn (do Admin cấu hình ở "⚙️ Ngành &amp; Phase của dự án") — chưa vào được, chọn dự án khác ở trên hoặc liên hệ Admin.</p>
+    <div class="tradepicker" id="tradepicker">
     <a class="tradecard" href="flow_diagram_plumbing.html" data-trade="plumbing">
       <span class="tradecard-emoji">🚿</span>
       <span class="tradecard-label">Plumbing</span>
@@ -750,6 +760,7 @@
       note.textContent = '✓ Đã chọn "' + name + '" — giờ bấm vào 1 Ngành bên dưới để bắt đầu.';
       note.style.display = '';
     }
+    refreshTradeScopeForSelectedProject(id);
   });
   function refreshMyProjects() {
     if (!sb || !CURRENT_USER) return Promise.resolve([]);
@@ -760,11 +771,37 @@
       }
       MY_PROJECTS = res.data || [];
       renderMyProjectsList(MY_PROJECTS);
+      var last = loadLastProject();
+      refreshTradeScopeForSelectedProject(last && last.id);
       return MY_PROJECTS;
     }).catch(function() {
       document.getElementById('myProjectsList').innerHTML = '<p class="dashempty">⚠️ Lỗi kết nối khi tải danh sách dự án.</p>';
       return [];
     });
+  }
+
+  // ---- Dim (and disable) trade cards NOT enabled for the currently-selected
+  // project — mirrors project_trades, the same table a trade page itself
+  // reads (checkProjectScope/applyProjectScopeUi) to lock out-of-scope
+  // Ngành. null/empty rows = project never configured = every trade enabled
+  // (the safe default, identical to every trade page's own fallback). ----
+  function applyTradeCardScope(enabledTrades) {
+    var note = document.getElementById('tradepickerNote');
+    var anyDimmed = false;
+    document.querySelectorAll('#tradepicker .tradecard[data-trade]').forEach(function(card) {
+      var t = card.getAttribute('data-trade');
+      var enabled = !enabledTrades || enabledTrades.indexOf(t) !== -1;
+      card.classList.toggle('tradecard-scoped-out', !enabled);
+      if (!enabled) anyDimmed = true;
+    });
+    if (note) note.style.display = anyDimmed ? 'block' : 'none';
+  }
+  function refreshTradeScopeForSelectedProject(projectId) {
+    if (!projectId || !sb) { applyTradeCardScope(null); return Promise.resolve(); }
+    return sb.from('project_trades').select('trade').eq('project_id', projectId).then(function(res) {
+      var rows = res.error ? [] : (res.data || []);
+      applyTradeCardScope(rows.length ? rows.map(function(r) { return r.trade; }) : null);
+    }).catch(function() { applyTradeCardScope(null); });
   }
 
   // ---- Admin check + Admin panel (assign Trưởng dự án, configure Ngành &
