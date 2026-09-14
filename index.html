@@ -217,9 +217,10 @@
 
   <div class="card" id="adminProjectsCard" style="display:none;">
     <h2><span class="tag">ADMIN</span> Danh sách dự án (Admin)
-      <button type="button" class="toolbtn" id="btnCloseAdmin" style="margin-left:auto;padding:4px 10px;">✕ Ẩn</button>
+      <button type="button" class="toolbtn primary" id="btnAdminCreateProject" style="margin-left:auto;">+ Tạo dự án mới</button>
+      <button type="button" class="toolbtn" id="btnCloseAdmin" style="padding:4px 10px;">✕ Ẩn</button>
     </h2>
-    <p style="font-size:12.5px;color:var(--sub);">Chỉ Admin thấy được mục này: xem tất cả dự án kèm Asset Code, và chỉ định Trưởng dự án cho từng dự án. Tạo dự án mới vẫn qua nút "+ Tham gia / Tạo dự án" như bình thường — chỉ Admin mới tạo được dự án CHƯA từng có.</p>
+    <p style="font-size:12.5px;color:var(--sub);">Chỉ Admin thấy được mục này: xem tất cả dự án kèm Asset Code, và chỉ định Trưởng dự án cho từng dự án. Bấm "+ Tạo dự án mới" ở trên để tạo dự án CHƯA từng có (nhập Tên dự án + Mã truy cập mới) — chỉ Admin mới tạo được.</p>
     <div id="adminProjectsList"></div>
   </div>
 
@@ -581,7 +582,19 @@
       setAuthBusy(true);
       sb.auth.updateUser({password: password}).then(function(res) {
         setAuthBusy(false);
-        if (res.error) { showAuthError(res.error.message); return; }
+        if (res.error) {
+          // "Auth session missing!" here means the recovery link's session
+          // was never actually established (or already expired/used) by the
+          // time Update Password was pressed — the raw message is confusing,
+          // so translate it into an actionable next step instead.
+          var raw = res.error.message || '';
+          if (raw.toLowerCase().indexOf('session') !== -1) {
+            showAuthError('Đường link đặt lại mật khẩu này đã hết hạn hoặc đã được dùng rồi. Vui lòng bấm "Forgot password?" ở màn hình đăng nhập để gửi lại 1 email đặt lại mật khẩu mới.');
+          } else {
+            showAuthError(raw);
+          }
+          return;
+        }
         authPasswordEl.value = ''; authPasswordConfirmEl.value = '';
         var user = res.data && res.data.user;
         if (user) {
@@ -717,11 +730,19 @@
   [gateNameEl, gateCodeEl].forEach(function(inp) {
     inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') gateBtn.click(); });
   });
-  document.getElementById('btnJoinProject').addEventListener('click', function() {
+  function openJoinCreateModal() {
     gateNameEl.value = ''; gateCodeEl.value = '';
     showGateError('');
     gateOverlay.style.display = 'flex';
-  });
+  }
+  document.getElementById('btnJoinProject').addEventListener('click', openJoinCreateModal);
+  // Admin's own entry point to create a brand-new project — Admin's
+  // "myProjectsCard" (which normally hosts btnJoinProject above) is hidden
+  // in favor of the full admin project list, so without this button Admin
+  // had NO way to reach the create/join modal at all. Same modal, same
+  // join_project RPC underneath (empty project name -> Admin gets to create).
+  var btnAdminCreateProject = document.getElementById('btnAdminCreateProject');
+  if (btnAdminCreateProject) btnAdminCreateProject.addEventListener('click', openJoinCreateModal);
   var gateCloseBtn = document.getElementById('gateClose');
   if (gateCloseBtn) {
     gateCloseBtn.addEventListener('click', function() {
@@ -989,19 +1010,48 @@
 
   // ---- Bootstrap: resume an existing login session if there is one,
   // otherwise show the login/signup overlay. A password-reset email link
-  // lands back here with a recovery token in the URL; Supabase-js detects
-  // it and fires 'PASSWORD_RECOVERY' — when that happens we must show the
-  // "set new password" form instead of silently continuing into the app. ----
+  // lands back here with a recovery token in the URL, in ONE of two shapes
+  // depending on the Supabase project's Auth flow setting:
+  //   • implicit flow:  #access_token=...&type=recovery  (a URL HASH)
+  //   • PKCE flow:      ?code=...&type=recovery           (a QUERY STRING)
+  // supabase-js auto-detects the implicit (hash) shape and fires
+  // 'PASSWORD_RECOVERY' on its own. The PKCE (?code=) shape is NOT reliably
+  // auto-exchanged for a real session by every supabase-js version — relying
+  // on it alone is what previously caused the page to switch into "Set New
+  // Password" mode (from a stray/incomplete event) while no session had
+  // actually been established yet, so Update Password failed with
+  // "Auth session missing!". Handling ?code= explicitly via
+  // exchangeCodeForSession() before checking the session closes that gap. ----
+  function getUrlParam(name) {
+    var fromSearch = new URLSearchParams(window.location.search).get(name);
+    if (fromSearch) return fromSearch;
+    var hash = window.location.hash.indexOf('#') === 0 ? window.location.hash.slice(1) : window.location.hash;
+    return new URLSearchParams(hash).get(name);
+  }
   var recoveryInProgress = false;
+  function enterRecoveryMode() {
+    recoveryInProgress = true;
+    authOverlay.style.display = 'flex';
+    setAuthMode('recovery');
+  }
   if (sb) {
     sb.auth.onAuthStateChange(function(event) {
-      if (event === 'PASSWORD_RECOVERY') {
-        recoveryInProgress = true;
-        authOverlay.style.display = 'flex';
-        setAuthMode('recovery');
-      }
+      if (event === 'PASSWORD_RECOVERY') enterRecoveryMode();
     });
-    sb.auth.getSession().then(function(res) {
+    var authCode = getUrlParam('code');
+    var linkIsRecovery = getUrlParam('type') === 'recovery';
+    var initPromise = authCode
+      ? sb.auth.exchangeCodeForSession(authCode).then(function(res) {
+          if (!res.error && linkIsRecovery) enterRecoveryMode();
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, '', window.location.pathname);
+          }
+          return res;
+        }).catch(function() { /* fall through to the plain getSession() check below */ })
+      : Promise.resolve();
+    initPromise.then(function() {
+      return sb.auth.getSession();
+    }).then(function(res) {
       if (recoveryInProgress) return;
       var session = res.data && res.data.session;
       if (session && session.user) {
